@@ -145,3 +145,5 @@ def plot_pca_results(plot_data, variances, facet_row=True, uniform_axes=True,
 
     if savefig:
         g.fig.savefig(filename)
+    else:
+        return g
