@@ -34,7 +34,7 @@ def build_color_palette(num_items, weeks_before_switch):
     return rgb_colors
 
 class GenePCA():
-    def __init__(self, raw_x, sample_names, sample_info):
+    def __init__(self, raw_x, sample_names, gene_names, sample_info):
         """
 
         :param raw_x:
@@ -44,6 +44,7 @@ class GenePCA():
         self.pca = PCA()
         self.X = raw_x
         self.sample_names = sample_names
+        self.gene_names = gene_names
         self.sample_info = sample_info
 
     def fit(self):
@@ -61,8 +62,17 @@ class GenePCA():
         # append on the data descriptors
         plot_data = plot_data.merge(self.sample_info,
                                     left_on = 'sample', right_on = 'ID')
-
         self.plot_data = plot_data
+
+        # prepare a dataframe with the most differentiating genes.
+        component_features = pd.DataFrame(self.pca.components_.T)
+        component_features['abs sum'] = component_features.abs().sum(axis=1)
+        component_features = pd.concat([component_features,
+                                        self.gene_names], axis=1)
+        component_features.sort(columns='abs sum', ascending=False,
+                                inplace=True)
+        self.component_features = component_features
+
         print(self.plot_data.head())
 
 
