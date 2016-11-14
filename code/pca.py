@@ -5,33 +5,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.decomposition import PCA
 
-def build_color_palette(num_items, weeks_before_switch):
-    num_pre_switch_colors = weeks_before_switch
-    num_post_switch_colors = num_items - num_pre_switch_colors
-    print('preparing colors for {} pre-oxygen-switch'.format(
-        num_pre_switch_colors),
-          'samples and {} post-switch samples'
-          .format(num_post_switch_colors))
-
-    # get the first colors from this pallete:
-    pre_switch_colors = \
-        sns.cubehelix_palette(11, start=.5, rot=-.75)[0:num_pre_switch_colors]
-    print(pre_switch_colors)
-
-    # get post-switch colors here:
-    # post_switch_colors = sns.diverging_palette(220, 20,
-    # n=6)[::-1][0:num_post_switch_colors]
-    post_switch_colors = \
-        sns.color_palette("coolwarm", num_post_switch_colors)
-    # sns.light_palette("navy", reverse=True)[0:num_post_switch_colors]
-    rgb_colors = pre_switch_colors + post_switch_colors
-    sns.palplot(rgb_colors)
-
-    # check that we got the right amount
-    print(num_items)
-    assert (num_items == len(rgb_colors))
-    print("")
-    return rgb_colors
 
 class GenePCA():
     def __init__(self, raw_x, sample_names, gene_names, sample_info):
@@ -76,9 +49,13 @@ class GenePCA():
         print(self.plot_data.head())
 
 
-def plot_pca_results(plot_data, variances, facet_row=True, uniform_axes=True,
+def plot_pca_results(plot_data, variances,
+                     color_palette,
+                     color_variable,
+                     facet_row=True, uniform_axes=True,
                      main_dir='./', plot_dir='./figures/',
-                     savefig=False, subplot_size=3):
+                     savefig=False, subplot_size=3,
+                     filename=None):
 
     # prepare axis labels, which also serve as dataframe column names.
     x_axis_label = 'principal component 1 ({0:0.2%})'.format(variances[0])
@@ -86,12 +63,6 @@ def plot_pca_results(plot_data, variances, facet_row=True, uniform_axes=True,
     plot_data = plot_data.rename(columns={'direction 1':x_axis_label})
     plot_data = plot_data.rename(columns={'direction 2':y_axis_label})
 
-    # define a custom color palette using:
-    # Conditions were switched at week ten, so seven early samples in
-    # the original condition and four latest samples in an alternative
-    # condition.
-    color_palette = build_color_palette(num_items=14 - 4 + 1,
-                                        weeks_before_switch=7)
 
     # update matplotlib params for bigger fonts, ticks:
     mpl.rcParams.update({
@@ -119,7 +90,7 @@ def plot_pca_results(plot_data, variances, facet_row=True, uniform_axes=True,
 
     def base_plot(**kwargs):
         plot = sns.FacetGrid(plot_data,
-                             hue='week', palette=color_palette,
+                             hue=color_variable, palette=color_palette,
                              size=subplot_size, aspect=1,
                              **kwargs)
         plot = (plot.map(plt.scatter, x_axis_label, y_axis_label,
@@ -140,20 +111,76 @@ def plot_pca_results(plot_data, variances, facet_row=True, uniform_axes=True,
 
     g = base_plot(**plot_args)
 
-    #filename = concat_dir_and_filename(
-    #    plot_dir, 'pca_of_top_{}_percent--'.format(top_percent))
-    filename = 'plot'
+    if filename is None and savefig:
+        filename = 'plot'
 
-    # prepare a filename, depending on whether all taxonomy or only genus
-    # is used.
-    if uniform_axes:
-        filename += '_unif_axes_'
-    if facet_row:
-        filename += '--faceted.pdf'
-    else:
-        filename += '.pdf'
+
 
     if savefig:
+        # prepare a filename, depending on whether all taxonomy or only genus
+        # is used.
+        if uniform_axes:
+            filename += '_unif_axes_'
+        if facet_row:
+            filename += '--faceted.pdf'
+        else:
+            filename += '.pdf'
         g.fig.savefig(filename)
     else:
         return g
+
+def plot_color_by_week(plot_data, variances, plot_pca_kwargs):
+    # define a custom color palette using:
+    # Conditions were switched at week ten, so seven early samples in
+    # the original condition and four latest samples in an alternative
+    # condition.
+    color_palette = build_double_color_palette(num_items=14 - 4 + 1,
+                                               weeks_before_switch=7)
+
+    plot_pca_results(plot_data, variances,
+                     color_palette=color_palette,
+                     color_variable='week',
+                     **plot_pca_kwargs)
+
+def plot_color_by_category(plot_data, variances,
+                           categories, n_categories,
+                           plot_pca_kwargs):
+
+    color_palette = build_categorical_color_palette(n_categories,)
+    plot_pca_results(plot_data, variances,
+                     color_palette=color_palette,
+                     color_variable=categories,
+                     **plot_pca_kwargs)
+
+
+def build_categorical_color_palette(n):
+    return sns.color_palette("Set1", n)
+
+
+def build_double_color_palette(num_items, weeks_before_switch):
+    num_pre_switch_colors = weeks_before_switch
+    num_post_switch_colors = num_items - num_pre_switch_colors
+    print('preparing colors for {} pre-oxygen-switch'.format(
+        num_pre_switch_colors),
+          'samples and {} post-switch samples'
+          .format(num_post_switch_colors))
+
+    # get the first colors from this pallete:
+    pre_switch_colors = \
+        sns.cubehelix_palette(11, start=.5, rot=-.75)[0:num_pre_switch_colors]
+    print(pre_switch_colors)
+
+    # get post-switch colors here:
+    # post_switch_colors = sns.diverging_palette(220, 20,
+    # n=6)[::-1][0:num_post_switch_colors]
+    post_switch_colors = \
+        sns.color_palette("coolwarm", num_post_switch_colors)
+    # sns.light_palette("navy", reverse=True)[0:num_post_switch_colors]
+    rgb_colors = pre_switch_colors + post_switch_colors
+    sns.palplot(rgb_colors)
+
+    # check that we got the right amount
+    print(num_items)
+    assert (num_items == len(rgb_colors))
+    print("")
+    return rgb_colors
