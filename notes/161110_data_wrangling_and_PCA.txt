@@ -1,0 +1,7 @@
+- How do we go from sample names to PCA labels? 
+    - e.g. LakWasMeta3_LOW4_2 --> week 4, low O2, reaplicate 3?
+    - use: https://github.com/JanetMatsen/elvizAnalysis/blob/dc568af7ed589410bf9612ba5ec7ccf257e87d1e/raw_data/sample_meta_info.tsv
+- Learned we only have 83 samples in meta4, not 88.
+    - "Dave": IIRC, there was a problem with those jobs.  We didn't followup because we were mostly in the evaluation phase.
+    - I think it was just simple node failures, nothing exotic
+
