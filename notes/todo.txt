@@ -1,0 +1,15 @@
+=== TODO ===
+- make an F matrix for each category
+  - functions to break apart dataframe on unique attributes of a column
+  - function to aggregate on gene name given a dataframe
+- make heat maps of the organism abundances
+  - separate out methanotrophs and methylotrophs by name.
+  - lump the others into "other"
+- finalize labels of methanotrophs/methylotrophs
+- play with sklearn cross validation
+- finalize research interests
+  - which methylotrophs are present, and what methanotrophy genes cause it?
+- start sketching out poster
+  - google docs?
+
+=== Done ===

@@ -1,0 +1,12 @@
+=== Potential Questions ===
+- What predicts which methanotroph will dominate?
+  - ??
+- Given pooled methanotroph gene expression, what predicts which methylotroph will dominate?
+  - assign fraction of reads to each species name; calculate fractional abundance
+    - are there problems with this metric I am forgetting? 
+-
+- what gene expression differentiates the dominant methanotrophs?
+  - infer the abundances from the read counts.
+  - ?? What fraction of the reads were mapped to these isolates?
+- predict which methylotroph arises based on methanotrophy
+  - based on methanotroph abundance
