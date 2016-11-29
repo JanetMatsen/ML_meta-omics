@@ -9,7 +9,15 @@
 - play with sklearn cross validation
 - finalize research interests
   - which methylotrophs are present, and what methanotrophy genes cause it?
+    - PCA on pooled methanotrophy gene expression
+    - use those PCA components to predict composition of methylotrophs
 - start sketching out poster
   - google docs?
 
 === Done ===
+
+
+=== Still pondering ===
+- compositional effects (e.g. fractional abundance)
+  - is this ok in ML?
+- 
