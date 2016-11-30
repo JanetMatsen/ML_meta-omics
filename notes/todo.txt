@@ -1,10 +1,13 @@
+=== TO Discuss ===
+- discuss why CCA is not the right choice for predicting which methylotroph
+  will dominate
+  - do we want an output for Y that is linear combinations of methylotrophs?
+- if X is gene expression, is it ok to apply our methods on Y, which is the
+  fraction of (normalized) expression attributed to each organism?
+    - they are not numerically independent.
+
 === TODO ===
-- make an F matrix for each category
-  - functions to break apart dataframe on unique attributes of a column
-  - function to aggregate on gene name given a dataframe
-- make heat maps of the organism abundances
-  - separate out methanotrophs and methylotrophs by name.
-  - lump the others into "other"
+- is our RPKM data really RPKM?  It's all integers, which makes it seem like counts.
 - finalize labels of methanotrophs/methylotrophs
 - play with sklearn cross validation
 - finalize research interests
@@ -20,4 +23,12 @@
 === Still pondering ===
 - compositional effects (e.g. fractional abundance)
   - is this ok in ML?
-- 
+-
+
+=== Done ===
+- make an F matrix for each category
+  - functions to break apart dataframe on unique attributes of a column
+  - function to aggregate on gene name given a dataframe
+- make heat maps of the organism abundances
+  - separate out methanotrophs and methylotrophs by name.
+  - lump the others into "other"
