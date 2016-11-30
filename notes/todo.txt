@@ -7,6 +7,7 @@
     - they are not numerically independent.
 
 === TODO ===
+- add the other data sets into our PCA projections: can we use them at all? 
 - is our RPKM data really RPKM?  It's all integers, which makes it seem like counts.
 - finalize labels of methanotrophs/methylotrophs
 - play with sklearn cross validation
