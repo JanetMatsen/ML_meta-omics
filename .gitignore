@@ -1,3 +1,13 @@
+analysis/CCA_methanotroph_expression_methylotroph_expression/results/
+data/genomes_curated.txt
+data/genomes_curated.xlsx
+data/m_nmm_expression--sum_by_gene/
+data/normalized_pca_eigenvectors.csv
+data/toy/
+figures/161123_PCA--color_by_O2_replicate.pdf
+figures/methylotroph_abundances/
+
+
 .RHistory
 notebooks/retired/*
 

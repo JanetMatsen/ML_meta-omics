@@ -7,7 +7,19 @@
     - they are not numerically independent.
 
 === TODO ===
-- add the other data sets into our PCA projections: can we use them at all? 
+- start with a vanilla sparse regression?
+  - back to the question of picking what y is. 
+- CCA:
+  - how sparse are my sparse results?
+  - how good is the fit?  What is the magnitude of correlation?
+  - does standard-scalar type treatment of expression before CCA make sense?
+  - how to interpret results?
+    - what do large weights mean?
+  - how do you answer what methanotrophy genes predict expression of a
+    methylotrophy gene of interest?
+  - how do we gauge how predictive the linear combination is?
+- PCA of only the methanotrophy genes?
+- add the other data sets into our PCA projections: can we use them at all?
 - is our RPKM data really RPKM?  It's all integers, which makes it seem like counts.
 - finalize labels of methanotrophs/methylotrophs
 - play with sklearn cross validation

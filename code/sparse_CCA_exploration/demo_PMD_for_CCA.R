@@ -14,12 +14,21 @@ v1 <- matrix(c(rep(1,50),rep(0,450)),ncol=1)
 v2 <- matrix(c(rep(0,50),rep(1,50),rep(0,900)),ncol=1)
 x <- u%*%t(v1) + matrix(rnorm(100*500),ncol=500)
 z <- u%*%t(v2) + matrix(rnorm(100*1000),ncol=1000)
+dim(x) # [1] 100 500
+dim(z) # [1]  100 1000
+
 # Can run CCA with default settings, and can get e.g. 3 components
 out <- CCA(x,z,typex="standard",typez="standard",K=3)
 print(out,verbose=TRUE) # To get less output, just print(out)
+# fraction zeros:
+sum(out$u[, 1] == 0)/length(out$u[, 1])  # 0.474
+# print(out) shows Num non-zeros u's:  263,  Num non-zeros v's:  549
+# 263/500 = 0.526
+
 # Or can use CCA.permute to choose optimal parameter values
 perm.out <- CCA.permute(x,z,typex="standard",typez="standard",nperms=7)
 print(perm.out)
 plot(perm.out)
 out <- CCA(x,z,typex="standard",typez="standard",K=1,penaltyx=perm.out$bestpenaltyx,penaltyz=perm.out$bestpenaltyz, v=perm.out$v.init)
 print(out)
+

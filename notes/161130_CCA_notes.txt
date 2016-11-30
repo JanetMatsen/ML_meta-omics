@@ -1,0 +1,23 @@
+- canonical correlation - correlation between two sets; the largest possible
+  correlation that can be found between linear combinations
+- weights:
+  - weights used to create the linear combinations; like regression coefficients
+- loadings:
+  - within-set loadings. Like loadings in PCA.
+    https://youtu.be/59_zANrbDpQ?t=6m20s
+- cross-loadings:
+  - https://youtu.be/59_zANrbDpQ?t=6m20s
+- suggested minimum sample size is 10* number of variables
+  - https://youtu.be/59_zANrbDpQ?t=13m11s
+- The method was first introduced by Harold Hotelling in 1936.
+  - https://en.wikipedia.org/wiki/Canonical_correlation
+- maximizing correlation
+  - unlike PCA, which maximizes variance that is extracted.
+    https://www.youtube.com/watch?v=yz5JO_fnGMA
+- can be thought of as dimension reduction
+- assumptions:
+  - https://youtu.be/yz5JO_fnGMA?t=14m50s
+    - linear relationship between variables (correlation is linear)
+    - multivariate normality
+    - multiple colinearity (?)
+-
