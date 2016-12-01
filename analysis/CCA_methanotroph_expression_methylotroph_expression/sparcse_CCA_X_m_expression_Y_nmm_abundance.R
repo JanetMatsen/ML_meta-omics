@@ -89,19 +89,22 @@ qplot(out_best_penalty$v, geom="histogram")
 
 
 model_zero_stats <- function(CCA_obj){
+        x_penalty = CCA_obj$penaltyx
         u = CCA_obj$u[,1]
         u_len = length(u)
         u_zeros = sum(u == 0)
         u_coeffs = sum(u != 0)
         u_frac_zeros = u_zeros/u_len
 
+        z_penalty = CCA_obj$penaltyz
         v = CCA_obj$v[,1]
         v_len = length(v)
         v_zeros = sum(v == 0)
         v_coeffs = sum(v != 0)
         v_frac_zeros = v_zeros/v_len
-        return(data.frame(penalty=penalty,
+        return(data.frame(x_penalty=x_penalty,
                           u_len=u_len, u_zeros=u_zeros, u_coeffs=u_coeffs, u_frac_zeros=u_frac_zeros,
+                          z_penalty=z_penalty,
                           v_len=v_len, v_zeros=v_zeros, v_coeffs=v_coeffs, v_frac_zeros=v_frac_zeros))
 }
 
@@ -109,31 +112,32 @@ model_zero_stats(out_best_penalty)
 
 #======  Loop over some different penalty values and find the number of zeros =========
 
-penalty_list = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99)
+analyze_penalty <- function(penalty_list){
+        print(penalty_list[1])
+        first_model = CCA(x, z, typex="standard", typez="standard", K=1,
+                          penaltyx=penalty_list[1], penaltyz=penalty_list[1])
+        results_coarse = model_zero_stats(first_model)
+        print(results_coarse)
+        i <- 0
+        for (penalty in penalty_list[-1]){
+                print(paste("penalty:", penalty))
+                model = CCA(x, z, typex="standard", typez="standard", K=1,
+                            penaltyx=penalty, penaltyz=penalty)
+                results_coarse <- rbind(results_coarse, model_zero_stats(model))
+                i <- i+1
+        }
+        return(results_coarse)
+        }
 
-#results = list()
-results_coarse = data.frame(penalty=double(),
-                     u_len=integer(), u_zeros=integer(), u_coeffs=integer(), u_frac_zeros=double(),
-                     v_len=integer(), v_zeros=integer(), v_coeffs=integer(), v_frac_zeros=double(),
-                     stringsAsFactors=F)
-results_coarse
-i <- 0
-for (penalty in penalty_list){
-        print(paste("penalty:", penalty))
-        #results <- c(results, 5)
-        #results <- c(results, model_zero_stats(out_best_penalty))
-        #results <- rbind(results, model_zero_stats(out_best_penalty))
-        model = CCA(x, z, typex="standard", typez="standard", K=1,
-                    penaltyx=penalty, penaltyz=penalty)
-        results_coarse <- rbind(results_coarse, model_zero_stats(model))
-        i <- i+1
-}
+demo = analyze_penalty(c(0.1, 0.2))
+demo
+ggplot(data=demo, aes(x_penalty, u_coeffs)) + geom_point()
 
-results_coarse
-data.frame(results_coarse)
-
-ggplot(data=results_coarse, aes(penalty, u_coeffs)) + geom_point()
-
+# penalty_list = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99)
+# penalty_list = c(0.001, 0.01, 0.03, 0.05, 0.075, 0.1)
+penalty_list = c(0.001, seq(0.01, 0.1, by=0.01))
+results = analyze_penalty(penalty_list)
+ggplot(data=results, aes(x_penalty, u_coeffs)) + geom_point() + geom_line()
 
 
 
