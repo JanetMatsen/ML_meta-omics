@@ -52,6 +52,7 @@ z = nmm[, -1]
 colnames(z)[0:5]
 
 # Can't have columns with standard deviation = 0
+# I got rid of them in the Python script, so these filters shouldn't be doing anything any longer.
 dim(x)
 dim(Filter(function(q) sd(q) != 0, x))
 x = Filter(function(q) sd(q) != 0, x)
@@ -60,78 +61,77 @@ z = Filter(function(q) sd(q) != 0, z)
 dim(z)
 
 
+# first try
 out <- CCA(x, z, typex="standard", typez="standard", K=1)
 print(out,verbose=TRUE)
 
+# Let the package determine good penalty values.
 perm.out <- CCA.permute(x,z,typex="standard",typez="standard",nperms=7)
 
 perm.out[0]
 names(perm.out)
+perm.out$bestpenaltyx
+perm.out$bestpenaltyz
 
-out07 <- CCA(x, z, typex="standard", typez="standard", K=1, penaltyx = 0.7, penaltyz = 0.7)
-head(head(out07))
-
-dim(out07["u"])
+out_best_penalty <- CCA(x, z, typex="standard", typez="standard", K=1,
+                        penaltyx=perm.out$bestpenaltyx, penaltyz=perm.out$bestpenaltyz)
+dim(out_best_penalty$u)
 dir.create('./results')
 
 getwd()
-write.table(out07$u, file = './results/u.csv', row.names = FALSE)
-write.table(out07$v, file = './results/v.csv', row.names = FALSE)
+write.table(out_best_penalty$u, file = './results/u_best_penalty.csv', row.names = FALSE)
+write.table(out_best_penalty$v, file = './results/v_best_penalty.csv', row.names = FALSE)
 
 # How sparse is the result for the recommended penalty?
-qplot(out07$u, geom="histogram")
-qplot(out07$v, geom="histogram")
+qplot(out_best_penalty$u, geom="histogram")
+qplot(out_best_penalty$v, geom="histogram")
 
-out.99 <- CCA(x, z, typex="standard", typez="standard", K=1,
-              penaltyx = .99, penaltyz = .99)
-qplot(out.99$u, geom="histogram")
 
-test = out.99$u[0:5]
-test
-class(test)
-dim(test)
-test[1] <- 0
-test
-sum(test == 0)/length(test)
 
-u0.99 <- out.99$u[,1]
-head(u0.99)
-class(u0.99)
-sum(u0.99 == 0)/length(u0.99)
-class(list(u0.99))
+model_zero_stats <- function(CCA_obj){
+        u = CCA_obj$u[,1]
+        u_len = length(u)
+        u_zeros = sum(u == 0)
+        u_frac_zeros = u_zeros/u_len
 
-sum(out.99$u == 0)
+        v = CCA_obj$v[,1]
+        v_len = length(v)
+        v_zeros = sum(v == 0)
+        v_frac_zeros = v_zeros/v_len
+        #return(c(u_len=u_len, u_zeros=u_zeros, u_frac_zeros=u_frac_zeros,
+        #         v_len=v_len, v_zeros=v_zeros, v_frac_zeros=v_frac_zeros ))
+        #return(c(u_len, u_zeros, u_frac_zeros,
+        #         v_len, v_zeros, v_frac_zeros ))
+        return(data.frame(u_len=u_len, u_zeros=u_zeros, u_frac_zeros=u_frac_zeros,
+                          v_len=v_len, v_zeros=v_zeros, v_frac_zeros=v_frac_zeros))
+}
 
-## try a silly-big penalty
-#out2.0 <- CCA(x, z, typex="standard", typez="standard", K=1,
-#                penaltyx = 2, penaltyz = 2)
-##Error in CCA(x, z, typex = "standard", typez = "standard", K = 1, penaltyx = 2,  :
-##                     Penaltyx must be between 0 and 1 when typex is standard.
+model_zero_stats(out_best_penalty)
 
-out.9999 <- CCA(x, z, typex="standard", typez="standard", K=1,
-              penaltyx = .9999, penaltyz = .9999)
+#======  Loop over some different penalty values and find the number of zeros =========
 
-qplot(out.9999$u, geom="histogram")
-qplot(out.9999$v, geom="histogram")
+penalty_list = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5)
 
-print(out.9999)
+#results = list()
+results = data.frame(u_len=integer(), u_zeros=integer(), u_frac_zeros=double(),
+                     v_len=integer(), v_zeros=integer(), v_frac_zeros=double(),
+                     stringsAsFactors=F)
+results
+i <- 0
+for (penalty in penalty_list){
+        print(paste("penalty:", penalty))
+        #results <- c(results, 5)
+        #results <- c(results, model_zero_stats(out_best_penalty))
+        #results <- rbind(results, model_zero_stats(out_best_penalty))
+        model = CCA(x, z, typex="standard", typez="standard", K=1,
+                    penaltyx=penalty, penaltyz=penalty)
+        results <- rbind(results, model_zero_stats(model))
+        i <- i+1
+}
 
-## try without standardization
-#out0.9_ns <- CCA(x, z, typex="standard", typez="standard", K=1,
-#                penaltyx = 0.9, penaltyz = 0.9, standardize = FALSE)
-## Error in CheckVs(v, x, z, K) : Problem computing SVD.
+results
+data.frame(results)
 
-# penaltyx:
-# The penalty to be applied to the matrix x, i.e. the penalty that results in the
-# canonical vector u. If typex is "standard" then the L1 bound on u is penaltyx*sqrt(ncol(x)).
-# In this case penaltyx must be between 0 and 1 (larger L1
-# bound corresponds to less penalization). If "ordered" then it’s the fused lasso
-out0.0001 <- CCA(x, z, typex="standard", typez="standard", K=1,
-                penaltyx = 0.0001, penaltyz = 0.0001)
 
-qplot(out0.0001$u, geom="histogram")
-qplot(out0.0001$v, geom="histogram")
-o0.0001 = out0.0001$u[,1]
-sum(o0.0001 == 0)/length(o0.0001)
 
-print(out0.0001)
+
