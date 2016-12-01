@@ -92,31 +92,31 @@ model_zero_stats <- function(CCA_obj){
         u = CCA_obj$u[,1]
         u_len = length(u)
         u_zeros = sum(u == 0)
+        u_coeffs = sum(u != 0)
         u_frac_zeros = u_zeros/u_len
 
         v = CCA_obj$v[,1]
         v_len = length(v)
         v_zeros = sum(v == 0)
+        v_coeffs = sum(v != 0)
         v_frac_zeros = v_zeros/v_len
-        #return(c(u_len=u_len, u_zeros=u_zeros, u_frac_zeros=u_frac_zeros,
-        #         v_len=v_len, v_zeros=v_zeros, v_frac_zeros=v_frac_zeros ))
-        #return(c(u_len, u_zeros, u_frac_zeros,
-        #         v_len, v_zeros, v_frac_zeros ))
-        return(data.frame(u_len=u_len, u_zeros=u_zeros, u_frac_zeros=u_frac_zeros,
-                          v_len=v_len, v_zeros=v_zeros, v_frac_zeros=v_frac_zeros))
+        return(data.frame(penalty=penalty,
+                          u_len=u_len, u_zeros=u_zeros, u_coeffs=u_coeffs, u_frac_zeros=u_frac_zeros,
+                          v_len=v_len, v_zeros=v_zeros, v_coeffs=v_coeffs, v_frac_zeros=v_frac_zeros))
 }
 
 model_zero_stats(out_best_penalty)
 
 #======  Loop over some different penalty values and find the number of zeros =========
 
-penalty_list = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5)
+penalty_list = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99)
 
 #results = list()
-results = data.frame(u_len=integer(), u_zeros=integer(), u_frac_zeros=double(),
-                     v_len=integer(), v_zeros=integer(), v_frac_zeros=double(),
+results_coarse = data.frame(penalty=double(),
+                     u_len=integer(), u_zeros=integer(), u_coeffs=integer(), u_frac_zeros=double(),
+                     v_len=integer(), v_zeros=integer(), v_coeffs=integer(), v_frac_zeros=double(),
                      stringsAsFactors=F)
-results
+results_coarse
 i <- 0
 for (penalty in penalty_list){
         print(paste("penalty:", penalty))
@@ -125,12 +125,14 @@ for (penalty in penalty_list){
         #results <- rbind(results, model_zero_stats(out_best_penalty))
         model = CCA(x, z, typex="standard", typez="standard", K=1,
                     penaltyx=penalty, penaltyz=penalty)
-        results <- rbind(results, model_zero_stats(model))
+        results_coarse <- rbind(results_coarse, model_zero_stats(model))
         i <- i+1
 }
 
-results
-data.frame(results)
+results_coarse
+data.frame(results_coarse)
+
+ggplot(data=results_coarse, aes(penalty, u_coeffs)) + geom_point()
 
 
 
