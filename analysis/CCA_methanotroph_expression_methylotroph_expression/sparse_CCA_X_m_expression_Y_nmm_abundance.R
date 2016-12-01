@@ -112,47 +112,100 @@ model_stats(out_best_penalty)
 
 #======  Loop over some different penalty values and find the number of zeros =========
 
-analyze_penalties <- function(penalty_list){
-        print(penalty_list[1])
-        first_model = CCA(x, z, typex="standard", typez="standard", K=1,
-                          penaltyx=penalty_list[1], penaltyz=penalty_list[1])
-        results_coarse = model_stats(first_model)
+test_pair_of_penalties <- function(penalty_list, x_penalty, z_penalty){
+        print(paste("x penalty: " + x_penalty + "z penalty" + z))
+        model = CCA(x, z, typex="standard", typez="standard", K=1,
+                    penaltyx=x_penalty, penaltyz=z_penalty_list)
+        return(model)}
+
+analyze_penalty_grid <- function(penalty_list){
+        results_coarse = data.frame()
         print(results_coarse)
-        i <- 0
-        for (penalty in penalty_list[-1]){
-                print(paste("penalty:", penalty))
-                model = CCA(x, z, typex="standard", typez="standard", K=1,
-                            penaltyx=penalty, penaltyz=penalty)
-                results_coarse <- rbind(results_coarse, model_stats(model))
-                i <- i+1
+        for (x_penalty in penalty_list){
+                for (z_penalty in penalty_list){
+                        model <- CCA(x, z, typex="standard", typez="standard", K=1,
+                                     penaltyx=x_penalty, penaltyz=z_penalty)
+                        results_coarse <- rbind(results_coarse, model_stats(model))
+                }
         }
         return(results_coarse)
         }
 
-demo = analyze_penalties(c(0.1, 0.2))
-demo
-ggplot(data=demo, aes(x_penalty, u_coeffs)) + geom_point()
+demo_results = analyze_penalty_grid(c(0.1, 0.2))
+demo_results
+p <- ggplot(demo_results, aes(x_penalty, z_penalty)) +
+        geom_tile(aes(fill = u_coeffs)) +
+        scale_fill_gradient(low = "white", high = "steelblue", limits=c(0, max(demo_results$u_coeffs))) +
+        ggtitle("# of coefficients for x (u)")
+p
 
-# penalty_list = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99)
-# penalty_list = c(0.001, 0.01, 0.03, 0.05, 0.075, 0.1)
+library(reshape2)
+demo_results_melted <- melt(demo_results, id.vars = c("x_penalty", "z_penalty"), measure.vars = c("u_coeffs", "v_coeffs"))
+demo_results_melted
+
+p <- ggplot(demo_results_melted, aes(x_penalty, z_penalty)) +
+        geom_tile(aes(fill = value)) +
+        scale_fill_gradient(low = "white", high = "steelblue", limits=c(0, max(demo_results_melted$value))) +
+        ggtitle("# of coefficients for each vector") +
+        facet_wrap(~variable)
+p
+
+# -------- Test a real grid ------
+grid = analyze_penalty_grid(c(0.001, seq(0.01, 0.05, by=0.01)))
+grid_melted = melt(grid, id.vars = c("x_penalty", "z_penalty"),
+                   measure.vars = c("u_coeffs", "v_coeffs"))
+grid_melted
+ggplot(grid_melted, aes(x_penalty, z_penalty)) +
+        geom_tile(aes(fill = value)) +
+        scale_fill_gradient(low = "white", high = "steelblue",
+                            limits=c(0, max(grid_melted$value))) +
+        ggtitle("# of coefficients for each vector") +
+        facet_wrap(~variable) + theme_bw()
+dir.create('./plots/')
+ggsave('./plots/161201_num_weights_is_independent_of_oter_penalty.pdf')
+
+# -------- Run same penalties for x and z wit higher resolution ------
+
+analyze_penalty_list <- function(penalty_list){
+        # do matching x and z penalties, since they don't appear to impact each other.
+        results_coarse = data.frame()
+        for (penalty in penalty_list){
+                model <- CCA(x, z, typex="standard", typez="standard", K=1,
+                             penaltyx=penalty, penaltyz=penalty)
+                results_coarse <- rbind(results_coarse, model_stats(model))
+        }
+        return(results_coarse)
+}
+
 penalty_list = c(0.001, seq(0.01, 0.05, by=0.003))
 print(penalty_list)
-results = analyze_penalties(penalty_list)
+results = analyze_penalty_list(penalty_list)
+results$penalty = results$x_penalty
+tail(results)
 
+results_melted =  melt(results, id.vars = c('penalty', "u_coeffs", "v_coeffs"),
+                       measure.vars = c("u_coeffs", "v_coeffs"),
+                       variable.name = 'regularization_penalty',
+                       value.name = 'num_nonzero_weights')
+tail(results_melted)
 
-ggplot(data=results, aes(x_penalty, u_coeffs)) + geom_point() + geom_line() + geom_hline(yintercept=8)
-ggplot(data=results, aes(z_penalty, v_coeffs)) + geom_point() + geom_line() + geom_hline(yintercept=8)
+ggplot(results_melted, aes(penalty, num_nonzero_weights,
+                    color=regularization_penalty)) + geom_point() + geom_line() +
+        geom_hline(yintercept=8)
+ggsave('./plots/161201_num_nonzero_weights_vs_penalty_for_full_training_set.pdf')
 
 # with N = 83, we need < ~8 weights
-penalty_list[0:4]
+penalty_list[0:10]
 
-penalty_x = 0.03
-penalty_z = 0.02
-final_model = CCA(x, z, typex="standard", typez="standard", K=1, penaltyx=penalty_x, penaltyz=penalty_z)
+penalty_x = 0.0335  # 0.33 --> 7, 0.34 --> 9
+penalty_z = 0.022
+final_model = CCA(x, z, typex="standard", typez="standard", K=1,
+                  penaltyx=penalty_x, penaltyz=penalty_z)
 final_results = model_stats(final_model)
 final_results
 
 # Save these resutls
-write.table(final_model$u, file = './results/u_penalties_0_03-0_02.csv', row.names = FALSE)
-write.table(final_model$v, file = './results/v_penalties_0_03-0_02.csv', row.names = FALSE)
+write.table(final_model$u, file = './results/u_whole_training_set--8_features.csv', row.names = FALSE)
+write.table(final_model$v, file = './results/v_whole_training_set--8_features.csv', row.names = FALSE)
 
+print(final_model)

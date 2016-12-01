@@ -1,0 +1,35 @@
+==== Plan: ====
+- make sure I want to have ~8 to 9 nonzero weights in my models.
+- decide if I want only one vector or multiple.  (Why multiple??)
+- pick a training data split fraction
+- finish analysis of one split fraction
+  - find out what regularization strength works for this amount of training data
+  - make the R script pretty minimal:
+    - just pass file names and thresholds,
+    - or investigate r2py or whatever that was called.
+  - make the sklearn plot showing correlation of the dot products
+  - quantitate correlation of the training ad test data
+- scale up to whole data set:
+  - how well does each model predict on the held-out validation set?
+  - how conserved are the sets of features that are picked out?
+
+- Bring it back to science
+  - which organisms are most responsible for the important features?
+
+==== Old ====
+- do I need to investigate independence of regularization strengths for the x and z?
+  - do a grid and count # of nonzero weights for X, Y.
+    - note that I can't plot it all in one figure.
+      - weights for x and z would be axes, heat map squares would be # of nonzero components
+      - plot heat map for x and z; look for one to have constant rows, and
+        one to have constant columns.
+- find out how strongly to regularize on x and z to get the right # of weights
+  - hopefully a fixed pair of values works for all cross-validation data sets
+- if they are pretty independent, do as follows:
+  - make an R script that:
+    - takes input:
+      - training X, Z matrices
+      - regularization constants
+    - takes in a straining set of features, and returns CCA weights
+  - for each single cross-validation set:
+    - run R script at a variety of
