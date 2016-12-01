@@ -88,7 +88,7 @@ qplot(out_best_penalty$v, geom="histogram")
 
 
 
-model_zero_stats <- function(CCA_obj){
+model_stats <- function(CCA_obj){
         x_penalty = CCA_obj$penaltyx
         u = CCA_obj$u[,1]
         u_len = length(u)
@@ -108,36 +108,51 @@ model_zero_stats <- function(CCA_obj){
                           v_len=v_len, v_zeros=v_zeros, v_coeffs=v_coeffs, v_frac_zeros=v_frac_zeros))
 }
 
-model_zero_stats(out_best_penalty)
+model_stats(out_best_penalty)
 
 #======  Loop over some different penalty values and find the number of zeros =========
 
-analyze_penalty <- function(penalty_list){
+analyze_penalties <- function(penalty_list){
         print(penalty_list[1])
         first_model = CCA(x, z, typex="standard", typez="standard", K=1,
                           penaltyx=penalty_list[1], penaltyz=penalty_list[1])
-        results_coarse = model_zero_stats(first_model)
+        results_coarse = model_stats(first_model)
         print(results_coarse)
         i <- 0
         for (penalty in penalty_list[-1]){
                 print(paste("penalty:", penalty))
                 model = CCA(x, z, typex="standard", typez="standard", K=1,
                             penaltyx=penalty, penaltyz=penalty)
-                results_coarse <- rbind(results_coarse, model_zero_stats(model))
+                results_coarse <- rbind(results_coarse, model_stats(model))
                 i <- i+1
         }
         return(results_coarse)
         }
 
-demo = analyze_penalty(c(0.1, 0.2))
+demo = analyze_penalties(c(0.1, 0.2))
 demo
 ggplot(data=demo, aes(x_penalty, u_coeffs)) + geom_point()
 
 # penalty_list = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99)
 # penalty_list = c(0.001, 0.01, 0.03, 0.05, 0.075, 0.1)
-penalty_list = c(0.001, seq(0.01, 0.1, by=0.01))
-results = analyze_penalty(penalty_list)
-ggplot(data=results, aes(x_penalty, u_coeffs)) + geom_point() + geom_line()
+penalty_list = c(0.001, seq(0.01, 0.05, by=0.003))
+print(penalty_list)
+results = analyze_penalties(penalty_list)
 
 
+ggplot(data=results, aes(x_penalty, u_coeffs)) + geom_point() + geom_line() + geom_hline(yintercept=8)
+ggplot(data=results, aes(z_penalty, v_coeffs)) + geom_point() + geom_line() + geom_hline(yintercept=8)
+
+# with N = 83, we need < ~8 weights
+penalty_list[0:4]
+
+penalty_x = 0.03
+penalty_z = 0.02
+final_model = CCA(x, z, typex="standard", typez="standard", K=1, penaltyx=penalty_x, penaltyz=penalty_z)
+final_results = model_stats(final_model)
+final_results
+
+# Save these resutls
+write.table(final_model$u, file = './results/u_penalties_0_03-0_02.csv', row.names = FALSE)
+write.table(final_model$v, file = './results/v_penalties_0_03-0_02.csv', row.names = FALSE)
 
