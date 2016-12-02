@@ -1,12 +1,12 @@
 === TO Discuss ===
-- discuss why CCA is not the right choice for predicting which methylotroph
-  will dominate
-  - do we want an output for Y that is linear combinations of methylotrophs?
-- if X is gene expression, is it ok to apply our methods on Y, which is the
+- is CCA is the right choice for predicting which methylotroph will dominate?
+  - do we want an output for Y that is linear combinations of methylotrophs? (yes?)
+- if X is gene expression, is it ok to apply our methods on Z, which is the
   fraction of (normalized) expression attributed to each organism?
     - they are not numerically independent.
 
 === TODO ===
+- think more about compositional nature of our data.  eScience office hours!
 - start with a vanilla sparse regression?
   - back to the question of picking what y is.
 - CCA:
@@ -28,7 +28,7 @@
   - google docs?
 - what fraction of reads are unmapped?
   - is Janet's old orange & gray plot from bins or these genomes?
-- 
+-
 
 === Done ===
 

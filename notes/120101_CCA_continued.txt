@@ -2,15 +2,11 @@
 - make sure I want to have ~8 to 9 nonzero weights in my models.
 - decide if I want only one vector or multiple.  (Why multiple??)
 - pick a training data split fraction
-- finish analysis of one split fraction
-  - find out what regularization strength works for this amount of training data
-  - make the R script pretty minimal:
-    - just pass file names and thresholds,
-    - or investigate r2py or whatever that was called.
-  - make the sklearn plot showing correlation of the dot products
+  - 1/4 seems nice
+- make the sklearn plot showing correlation of the dot products
   - quantitate correlation of the training ad test data
 - scale up to whole data set:
-  - do standard scalar on the x,z data I'm saving; then my dot products in R will work. 
+  - do standard scalar on the x,z data I'm saving; then my dot products in R will work.
   - how well does each model predict on the held-out validation set?
   - how conserved are the sets of features that are picked out?
 
@@ -18,6 +14,11 @@
   - which organisms are most responsible for the important features?
 
 ==== Old ====
+- finish analysis of one split fraction
+  - find out what regularization strength works for this amount of training data
+  - make the R script pretty minimal:
+    - just pass file names and thresholds,
+    - or investigate r2py or whatever that was called.
 - do I need to investigate independence of regularization strengths for the x and z?
   - do a grid and count # of nonzero weights for X, Y.
     - note that I can't plot it all in one figure.
