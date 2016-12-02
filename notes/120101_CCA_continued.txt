@@ -10,6 +10,7 @@
   - make the sklearn plot showing correlation of the dot products
   - quantitate correlation of the training ad test data
 - scale up to whole data set:
+  - do standard scalar on the x,z data I'm saving; then my dot products in R will work. 
   - how well does each model predict on the held-out validation set?
   - how conserved are the sets of features that are picked out?
 

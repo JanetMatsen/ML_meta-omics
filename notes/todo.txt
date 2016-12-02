@@ -26,6 +26,9 @@
     - use those PCA components to predict composition of methylotrophs
 - start sketching out poster
   - google docs?
+- what fraction of reads are unmapped?
+  - is Janet's old orange & gray plot from bins or these genomes?
+- 
 
 === Done ===
 
