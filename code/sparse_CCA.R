@@ -15,17 +15,28 @@ library("PMA")
 library("ggplot2")
 
 args = commandArgs(trailingOnly=TRUE)
-x_filename = args[1]
-print(paste("x filename:", x_filename))
-z_filename = args[2]
-print(paste("z filename:", z_filename))
+x_filepath = args[1]
+print(paste("x file path:", x_filepath))
+z_filepath = args[2]
+print(paste("z file path:", z_filepath))
 penaltyx = as.numeric(args[3])
 penaltyz = as.numeric(args[4])
 print(paste('penaltyx:', penaltyx))
 print(paste('penaltyz:', penaltyz))
+out_dir = args[5]
+print(paste('output directory:', out_dir))
 
-x <- read.csv(x_filename, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-z <- read.csv(z_filename, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+# prepare file paths to save resulting weights:
+u_filepath = gsub(basename(x_filepath), pattern = '.tsv', replacement = '_u.tsv')
+v_filepath = gsub(basename(z_filepath), pattern = '.tsv', replacement = '_v.tsv')
+# add on the output directory name
+u_filepath = file.path(out_dir, u_filepath)
+v_filepath = file.path(out_dir, v_filepath)
+print(paste('output path for u: ', u_filepath))
+print(paste('output path for v: ', v_filepath))
+
+x <- read.csv(x_filepath, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+z <- read.csv(z_filepath, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 
 # Note: R is modifying the gene (column) names:
 # http://stackoverflow.com/questions/10441437/x-in-my-column-names-of-an-r-data-frame
@@ -49,14 +60,10 @@ print('train model')
 model <- CCA(x, z, typex="standard", typez="standard", K=1,
              penaltyx=penaltyx, penaltyz=penaltyz)
 
-# prepare filename to save resulting weights:
-u_filename = gsub(x_filename, pattern = '.tsv', replacement = '_u.tsv')
-v_filename = gsub(z_filename, pattern = '.tsv', replacement = '_v.tsv')
-
 u <- model$u
 v <- model$v
 
-print(paste('save output files to:', u_filename, v_filename))
-write.table(u, file = u_filename, row.names = FALSE)
-write.table(v, file = v_filename, row.names = FALSE)
+print(paste('save output files to:', u_filepath, v_filepath))
+write.table(u, file = u_filepath, row.names = FALSE)
+write.table(v, file = v_filepath, row.names = FALSE)
 
