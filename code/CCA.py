@@ -40,6 +40,8 @@ class CCA:
         summary['train correlation'] = self.correlation(self.x, self.z)
         summary['validation correlation'] = \
             self.correlation(self.val_x, self.val_z)
+        summary['# nonzero u weights'] = None
+        summary['# nonzero v weights'] = None
 
         summary = {k:[v] for k, v in summary}
 
