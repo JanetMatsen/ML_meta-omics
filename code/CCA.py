@@ -1,6 +1,7 @@
 import matplotlib.pylab as plt
 import numpy as np
 import os
+import re
 import subprocess
 
 import pandas as pd
@@ -71,9 +72,93 @@ class CcaAnalysis(object):
         return sum(vector == 0)
 
 
+class ExpressionCCA(CcaAnalysis):
+    """
+    Wrapper class: prepare and run CCA for particular x, z data sets
+    """
+    def __init__(self, x_train_filename, z_train_filename,
+                 x_val_filename, z_val_filename,
+                 input_filepath, u_v_output_dir,
+                 penalty_x, penalty_z,
+                 path_to_R_script='../../code/sparse_CCA.R'):
+
+        self.penalty_x = penalty_x
+        self.penalty_z = penalty_z
+        self.path_to_R_script=path_to_R_script
+
+        assert os.path.exists(input_filepath), \
+            "input filepath, {}, doesn't exist".format(input_filepath)
+        if not os.path.exists(u_v_output_dir):
+            os.mkdir(u_v_output_dir)
+        self.u_v_output_dir = u_v_output_dir
+
+        self.x_train_filepath = x_train_filename
+        self.z_train_filepath = z_train_filename
+        self.x_val_filepath = x_val_filename
+        self.z_val_filepath = z_val_filename
+
+        self.penalty_x = penalty_x
+        self.penalty_z = penalty_z
+
+        # prepare u and v
+        x, z, u, v = self.write_csv_and_run_R()
+
+        super(ExpressionCCA, self).__init__(
+            x=x, z=z, u=u, v=v,
+            val_x=self.load_array(self.x_val_filepath),
+            val_z=self.load_array(self.z_val_filepath))
+
+    @staticmethod
+    def load_array(filepath):
+        vector = np.genfromtxt(filepath, delimiter='\t')
+        print('vector {} has shape {}'.format(filepath, vector.shape))
+        return vector
+
+    def write_csv_and_run_R(self, delete_u_v=False):
+        x = self.load_array(self.x_train_filepath)
+        self.x = x
+        z = self.load_array(self.z_train_filepath)
+        self.z = z
+
+        # get the data back out
+        def prepare_output_filename(input_filename, extra_string):
+            # methylotroph_fold1_train.tsv --> fold1_train_u.tsv
+            print('output dir: {}'.format(self.u_v_output_dir))
+            s = os.path.basename(input_filename)
+            m = re.search('[_A-z]+(fold[0-9]+[._A-z]+.tsv)', s)
+            s = m.group(1)
+            s = s.replace('.tsv', '_{}.tsv'.format(extra_string))
+            s = os.path.join(self.u_v_output_dir, s)
+            print('Will save output for {} to {}'.format(input_filename, s))
+            return s
+
+        u_path = prepare_output_filename(self.x_train_filepath,
+                                         extra_string='u')
+        v_path = prepare_output_filename(self.z_train_filepath ,
+                                         extra_string='v')
+
+        # Run R
+        command = ['Rscript', self.path_to_R_script,
+                   self.x_train_filepath, self.z_train_filepath,
+                   u_path, v_path,
+                   str(self.penalty_x), str(self.penalty_z)]
+        print('command: \n {}'.format(" ".join(command)))
+        subprocess.check_call(command)
+
+        # R adds a header row, 'V1' we chop off.
+        u = np.genfromtxt(u_path, delimiter='\t', skip_header=1)
+        v = np.genfromtxt(v_path, delimiter='\t', skip_header=1)
+        print(u.shape)
+        print(v.shape)
+
+        # todo: assert some shape constraints.
+
+        return x, z, u, v
+
 
 class SklearnCca(CcaAnalysis):
     def __init__(self, penalty_x, penalty_z,
+                 output_dir = './sklearn_test',
                  path_to_R_script='../../code/sparse_CCA.R'):
         # Recreate the CCA results from sklearn
         # http://scikit-learn.org/stable/auto_examples/cross_decomposition/plot_compare_cross_decomposition.html#sphx-glr-auto-examples-cross-decomposition-plot-compare-cross-decomposition-py
@@ -81,6 +166,9 @@ class SklearnCca(CcaAnalysis):
         self.penalty_x = penalty_x
         self.penalty_z = penalty_z
         self.path_to_R_script=path_to_R_script
+        self.output_dir = output_dir
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
 
         X_train, Y_train, X_test, Y_test = self.prepare_data()
 
@@ -91,7 +179,6 @@ class SklearnCca(CcaAnalysis):
         super(SklearnCca, self).__init__(x=X_train, z=Y_train,
                                          u=u, v=v,
                                          val_x=X_test, val_z=Y_test)
-
 
     def prepare_data(self):
         """
@@ -132,16 +219,17 @@ class SklearnCca(CcaAnalysis):
             filenames_to_remove.append(fname)
             np.savetxt(fname, a, delimiter='\t')
 
+        u_path = os.path.join(self.output_dir, 'u.tsv')
+        v_path = os.path.join(self.output_dir, 'v.tsv')
+
         # Run R
         command = ['Rscript', self.path_to_R_script,
                    filenames_to_remove[0], filenames_to_remove[1],
-                   str(self.penalty_x), str(self.penalty_z), '.']
+                   u_path, v_path,
+                   str(self.penalty_x), str(self.penalty_z)]
         print('command: \n {}'.format(" ".join(command)))
         subprocess.check_call(command)
 
-        # get the data back out
-        u_path = filenames_to_remove[0].replace('.tsv', '_u.tsv')
-        v_path = filenames_to_remove[1].replace('.tsv', '_v.tsv')
         u = np.genfromtxt(u_path, delimiter='\t', skip_header=1)
         v = np.genfromtxt(v_path, delimiter='\t', skip_header=1)
         print(u.shape)

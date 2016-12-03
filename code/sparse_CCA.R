@@ -19,21 +19,14 @@ x_filepath = args[1]
 print(paste("x file path:", x_filepath))
 z_filepath = args[2]
 print(paste("z file path:", z_filepath))
-penaltyx = as.numeric(args[3])
-penaltyz = as.numeric(args[4])
+
+u_filepath = args[3]
+v_filepath = args[4]
+
+penaltyx = as.numeric(args[5])
+penaltyz = as.numeric(args[6])
 print(paste('penaltyx:', penaltyx))
 print(paste('penaltyz:', penaltyz))
-out_dir = args[5]
-print(paste('output directory:', out_dir))
-
-# prepare file paths to save resulting weights:
-u_filepath = gsub(basename(x_filepath), pattern = '.tsv', replacement = '_u.tsv')
-v_filepath = gsub(basename(z_filepath), pattern = '.tsv', replacement = '_v.tsv')
-# add on the output directory name
-u_filepath = file.path(out_dir, u_filepath)
-v_filepath = file.path(out_dir, v_filepath)
-print(paste('output path for u: ', u_filepath))
-print(paste('output path for v: ', v_filepath))
 
 x <- read.csv(x_filepath, sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 z <- read.csv(z_filepath, sep = '\t', header = FALSE, stringsAsFactors = FALSE)
