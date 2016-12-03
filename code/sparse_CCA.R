@@ -35,8 +35,8 @@ v_filepath = file.path(out_dir, v_filepath)
 print(paste('output path for u: ', u_filepath))
 print(paste('output path for v: ', v_filepath))
 
-x <- read.csv(x_filepath, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-z <- read.csv(z_filepath, sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+x <- read.csv(x_filepath, sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+z <- read.csv(z_filepath, sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 
 # Note: R is modifying the gene (column) names:
 # http://stackoverflow.com/questions/10441437/x-in-my-column-names-of-an-r-data-frame
@@ -52,8 +52,8 @@ stopifnot(nrow(x[rowSums(is.na(x)) > 0,]) == 0)
 stopifnot(nrow(z[rowSums(is.na(z)) > 0,]) == 0)
 
 # get rid of the 'product' column, and transpose.
-x = x[, -1]
-z = z[, -1]
+#x = x[, -1]
+#z = z[, -1]
 
 # train model
 print('train model')
