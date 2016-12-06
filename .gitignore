@@ -1,3 +1,5 @@
+*.DS_Store
+*.pdf
 analysis/CCA_methanotroph_expression_methylotroph_expression/results/
 data/genomes_curated.txt
 data/genomes_curated.xlsx
