@@ -50,7 +50,9 @@ stopifnot(nrow(z[rowSums(is.na(z)) > 0,]) == 0)
 
 # train model
 print('train model')
-model <- CCA(x, z, typex="standard", typez="standard", K=1,
+model <- CCA(x, z,
+             #standardize=FALSE, # don't standardize or we can't transform
+             typex="standard", typez="standard", K=1,
              penaltyx=penaltyx, penaltyz=penaltyz)
 
 u <- model$u

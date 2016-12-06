@@ -138,12 +138,18 @@ class ExpressionCCA(CcaAnalysis):
                                          extra_string='v')
 
         # Run R
+        # todo: this will keep concatenating to the same file.  Need to delete
+        # it sometimes, put a time stamp on it, or something else.
+        stdout_file = open('stdout_CCA.txt', 'a')
+        stderr_file = open('stderr_CCA.txt', 'a')
         command = ['Rscript', self.path_to_R_script,
                    self.x_train_filepath, self.z_train_filepath,
                    u_path, v_path,
                    str(self.penalty_x), str(self.penalty_z)]
         print('command: \n {}'.format(" ".join(command)))
-        subprocess.check_call(command)
+        subprocess.check_call(command, stdout=stdout_file, stderr=stderr_file)
+        stdout_file.close()
+        stderr_file.close()
 
         # R adds a header row, 'V1' we chop off.
         u = np.genfromtxt(u_path, delimiter='\t', skip_header=1)
