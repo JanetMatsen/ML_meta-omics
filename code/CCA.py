@@ -228,7 +228,9 @@ class SklearnCca(CcaAnalysis):
                    u_path, v_path,
                    str(self.penalty_x), str(self.penalty_z)]
         print('command: \n {}'.format(" ".join(command)))
-        subprocess.check_call(command)
+
+        file_handle = open('stdout_sklearn.txt', 'a')
+        subprocess.check_call(command, stdout=file_handle)
 
         u = np.genfromtxt(u_path, delimiter='\t', skip_header=1)
         v = np.genfromtxt(v_path, delimiter='\t', skip_header=1)
