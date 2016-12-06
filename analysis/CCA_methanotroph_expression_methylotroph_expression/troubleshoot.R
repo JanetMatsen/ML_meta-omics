@@ -12,28 +12,19 @@
 library("PMA")
 library("ggplot2")
 
-m <- read.csv('../../data/m_nmm_expression--sum_by_gene/methanotroph_expression_pooled_on_gene_name.tsv',
-              sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+m <- read.csv('../../data/cross_val_data/methanotroph_fold1_train.tsv',
+              sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 dim(m)
-# problem loding: the ' in tRNA G18 (ribose-2'-O)-methylase SpoU is giving trouble.
-# read in as tRNA G18 (ribose-2-O)-methylase SpoU and the tabs are all part of the first column
-# fixed by using read.csv instead of read.table.
-# http://stackoverflow.com/questions/9620155/how-to-read-a-csv-file-containing-apostrophes-into-r
-nmm <- read.csv('../../data/m_nmm_expression--sum_by_gene/methylotroph_expression_pooled_on_gene_name.tsv',
-                sep = '\t', header = TRUE, stringsAsFactors = FALSE) #, colClasses=c("product"="character"))
 
-# Note: R is modifying the gene (column) names:
-# http://stackoverflow.com/questions/10441437/x-in-my-column-names-of-an-r-data-frame
-# (1->4)-alpha-D-glucan 1-alpha-D-glucosylmutase
-# becomes "X.1..4..alpha.D.glucan.1.alpha.D.glucosylmutase"
+nmm <- read.csv('../../data/cross_val_data/methylotroph_fold1_train.tsv',
+                sep = '\t', header = FALSE, stringsAsFactors = FALSE) #, colClasses=c("product"="character"))
+dim(nmm)
 
-dim(m) # [1]   83 4593
-dim(nmm) # [1]   83 7355
+dim(m) # [1]   61 4840
+dim(nmm) # [1]    61 10123
 
 colnames(m)[0:10]
 m[0:3, 0:10]
-sample_names <- m['X']
-head(sample_names)
 nmm[0:3, 0:10]
 
 # Cannot have NAs in x or z
@@ -41,16 +32,8 @@ nmm[0:3, 0:10]
 dim(m[rowSums(is.na(m)) > 0,])
 dim(nmm[rowSums(is.na(nmm)) > 0,])
 
-# get rid of the 'product' column, and transpose.
-dim(m)
-lapply(m, class)
-
-x = m[, -1]
-colnames(x)[0:5]
-
-z = nmm[, -1]
-colnames(z)[0:5]
-
+x <- m
+z <- nmm
 # Can't have columns with standard deviation = 0
 # I got rid of them in the Python script, so these filters shouldn't be doing anything any longer.
 dim(x)
@@ -60,33 +43,8 @@ dim(z)
 z = Filter(function(q) sd(q) != 0, z)
 dim(z)
 
-
-# first try
-out <- CCA(x, z, typex="standard", typez="standard", K=1)
-print(out,verbose=TRUE)
-
-# Let the package determine good penalty values.
-perm.out <- CCA.permute(x,z,typex="standard",typez="standard",nperms=7)
-
-perm.out[0]
-names(perm.out)
-perm.out$bestpenaltyx
-perm.out$bestpenaltyz
-
-out_best_penalty <- CCA(x, z, typex="standard", typez="standard", K=1,
-                        penaltyx=perm.out$bestpenaltyx, penaltyz=perm.out$bestpenaltyz)
-dim(out_best_penalty$u)
 dir.create('./results')
-
 getwd()
-write.table(out_best_penalty$u, file = './results/u_best_penalty.csv', row.names = FALSE)
-write.table(out_best_penalty$v, file = './results/v_best_penalty.csv', row.names = FALSE)
-
-# How sparse is the result for the recommended penalty?
-qplot(out_best_penalty$u, geom="histogram")
-qplot(out_best_penalty$v, geom="histogram")
-
-
 
 model_stats <- function(CCA_obj){
         x_penalty = CCA_obj$penaltyx
@@ -107,8 +65,6 @@ model_stats <- function(CCA_obj){
                           z_penalty=z_penalty,
                           v_len=v_len, v_zeros=v_zeros, v_coeffs=v_coeffs, v_frac_zeros=v_frac_zeros))
 }
-
-model_stats(out_best_penalty)
 
 #======  Loop over some different penalty values and find the number of zeros =========
 
@@ -151,7 +107,7 @@ p <- ggplot(demo_results_melted, aes(x_penalty, z_penalty)) +
 p
 
 # -------- Test a real grid ------
-grid = analyze_penalty_grid(c(0.001, seq(0.01, 0.05, by=0.01)))
+grid = analyze_penalty_grid(c(0.001, seq(0.01, 0.1, by=0.01)))
 grid_melted = melt(grid, id.vars = c("x_penalty", "z_penalty"),
                    measure.vars = c("u_coeffs", "v_coeffs"))
 grid_melted
@@ -162,7 +118,7 @@ ggplot(grid_melted, aes(x_penalty, z_penalty)) +
         ggtitle("# of coefficients for each vector") +
         facet_wrap(~variable) + theme_bw()
 dir.create('./plots/')
-ggsave('./plots/161201_num_weights_is_independent_of_oter_penalty.pdf')
+ggsave('./plots/161206_num_weights_is_independent_of_oter_penalty.pdf')
 
 # -------- Run same penalties for x and z wit higher resolution ------
 
@@ -177,7 +133,7 @@ analyze_penalty_list <- function(penalty_list){
         return(results_coarse)
 }
 
-penalty_list = c(0.001, seq(0.01, 0.05, by=0.003))
+penalty_list = c(0.001, seq(0.01, 0.1, by=0.003))
 print(penalty_list)
 results = analyze_penalty_list(penalty_list)
 results$penalty = results$x_penalty
@@ -192,7 +148,7 @@ tail(results_melted)
 ggplot(results_melted, aes(penalty, num_nonzero_weights,
                            color=regularization_penalty)) + geom_point() + geom_line() +
         geom_hline(yintercept=8)
-ggsave('./plots/161201_num_nonzero_weights_vs_penalty_for_full_training_set.pdf')
+ggsave('./plots/161206_num_nonzero_weights_vs_penalty_for_full_training_set.pdf')
 
 # with N = 83, we need < ~8 weights
 penalty_list[0:10]
