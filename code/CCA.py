@@ -19,6 +19,7 @@ class CcaAnalysis(object):
         self.val_z = val_z
 
         self.project()
+        self.summary = None
 
     def project(self):
         self.x_projected = self.x.dot(self.u)
@@ -43,7 +44,7 @@ class CcaAnalysis(object):
         if filename is not None:
             fig.savefig(filename + '.pdf')
 
-        print('testing')
+#        print('testing')
         return fig
 
     @staticmethod
@@ -65,6 +66,12 @@ class CcaAnalysis(object):
         #summary = {k:[v] for k, v in summary.items()}
         #return pd.DataFrame(summary)
         self.summary = summary
+        
+    def get_summary(self):
+        if self.summary is None:
+            self.summarise()
+        return self.summary
+            
 
     @staticmethod
     def num_nonzero(vector):
@@ -80,6 +87,7 @@ class ExpressionCCA(CcaAnalysis):
                  x_val_filename, z_val_filename,
                  input_filepath, u_v_output_dir,
                  penalty_x, penalty_z,
+                 verbose = False,
                  path_to_R_script='../../code/sparse_CCA.R'):
 
         self.penalty_x = penalty_x
@@ -101,7 +109,7 @@ class ExpressionCCA(CcaAnalysis):
         self.penalty_z = penalty_z
 
         # prepare u and v
-        x, z, u, v = self.write_csv_and_run_R()
+        x, z, u, v = self.write_csv_and_run_R(verbose=verbose)
 
         super(ExpressionCCA, self).__init__(
             x=x, z=z, u=u, v=v,
@@ -109,12 +117,13 @@ class ExpressionCCA(CcaAnalysis):
             val_z=self.load_array(self.z_val_filepath))
 
     @staticmethod
-    def load_array(filepath):
+    def load_array(filepath, verbose=False):
         vector = np.genfromtxt(filepath, delimiter='\t')
-        print('vector {} has shape {}'.format(filepath, vector.shape))
+        if verbose:
+            print('vector {} has shape {}'.format(filepath, vector.shape))
         return vector
 
-    def write_csv_and_run_R(self, delete_u_v=False):
+    def write_csv_and_run_R(self, delete_u_v=False, verbose=False):
         x = self.load_array(self.x_train_filepath)
         self.x = x
         z = self.load_array(self.z_train_filepath)
@@ -123,19 +132,23 @@ class ExpressionCCA(CcaAnalysis):
         # get the data back out
         def prepare_output_filename(input_filename, extra_string):
             # methylotroph_fold1_train.tsv --> fold1_train_u.tsv
-            print('output dir: {}'.format(self.u_v_output_dir))
+            if verbose:
+                print('output dir: {}'.format(self.u_v_output_dir))
             s = os.path.basename(input_filename)
             m = re.search('[_A-z]+(fold[0-9]+[._A-z]+.tsv)', s)
             s = m.group(1)
             s = s.replace('.tsv', '_{}.tsv'.format(extra_string))
             s = os.path.join(self.u_v_output_dir, s)
-            print('Will save output for {} to {}'.format(input_filename, s))
+            if verbose:
+                print('Will save output for {} to {}'.format(input_filename, s))
             return s
 
         u_path = prepare_output_filename(self.x_train_filepath,
-                                         extra_string='u')
+                                         extra_string='u_penX' + str(self.penalty_x)
+                                        + '_penZ' + str(self.penalty_z))
         v_path = prepare_output_filename(self.z_train_filepath ,
-                                         extra_string='v')
+                                         extra_string='v_penX' + str(self.penalty_x)
+                                        + '_penZ' + str(self.penalty_z))
 
         # Run R
         # todo: this will keep concatenating to the same file.  Need to delete
@@ -146,7 +159,8 @@ class ExpressionCCA(CcaAnalysis):
                    self.x_train_filepath, self.z_train_filepath,
                    u_path, v_path,
                    str(self.penalty_x), str(self.penalty_z)]
-        print('command: \n {}'.format(" ".join(command)))
+        if verbose:
+            print('command: \n {}'.format(" ".join(command)))
         subprocess.check_call(command, stdout=stdout_file, stderr=stderr_file)
         stdout_file.close()
         stderr_file.close()
@@ -154,8 +168,9 @@ class ExpressionCCA(CcaAnalysis):
         # R adds a header row, 'V1' we chop off.
         u = np.genfromtxt(u_path, delimiter='\t', skip_header=1)
         v = np.genfromtxt(v_path, delimiter='\t', skip_header=1)
-        print(u.shape)
-        print(v.shape)
+        if verbose:
+            print(u.shape)
+            print(v.shape)
 
         # todo: assert some shape constraints.
 
