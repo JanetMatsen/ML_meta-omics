@@ -85,6 +85,7 @@ class ExpressionCCA(CcaAnalysis):
     """
     def __init__(self, x_train_filename, z_train_filename,
                  x_val_filename, z_val_filename,
+                 gene_filepath,
                  input_filepath, u_v_output_dir,
                  penalty_x, penalty_z,
                  verbose = False,
@@ -104,6 +105,7 @@ class ExpressionCCA(CcaAnalysis):
         self.z_train_filepath = z_train_filename
         self.x_val_filepath = x_val_filename
         self.z_val_filepath = z_val_filename
+        self.gene_filepath = gene_filepath
 
         self.penalty_x = penalty_x
         self.penalty_z = penalty_z
@@ -128,6 +130,8 @@ class ExpressionCCA(CcaAnalysis):
         self.x = x
         z = self.load_array(self.z_train_filepath)
         self.z = z
+        names = self.load_array(self.gene_filepath)
+        self.gene_names = names
 
         # get the data back out
         def prepare_output_filename(input_filename, extra_string):
