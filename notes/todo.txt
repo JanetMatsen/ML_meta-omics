@@ -1,37 +1,28 @@
 === TO Discuss ===
 - is CCA is the right choice for predicting which methylotroph will dominate?
   - do we want an output for Y that is linear combinations of methylotrophs? (yes?)
-- if X is gene expression, is it ok to apply our methods on Z, which is the
-  fraction of (normalized) expression attributed to each organism?
-    - they are not numerically independent.
+- video:
+  https://www.youtube.com/watch?v=59_zANrbDpQ
 
 === TODO ===
-- think more about compositional nature of our data.  eScience office hours!
-- start with a vanilla sparse regression?
-  - back to the question of picking what y is.
+- remove protein of unknown function
+  - "conserved", 'hypothetical'
+- try the cross-val more.
+- is there a way to get out of standard scalar in R?
+- plot time series
+- increase the iteration threshold more
+- don't let R normalize, or at least
+- WHAT ARE THE GENES?
+- What are the weights?  Are many of them close to zero?
 - CCA:
-  - plot training and test in 2D after CCA like in the sklearn example.
-  - how good is the fit?  What is the magnitude of correlation?
-  - does standard-scalar type treatment of expression before CCA make sense?
   - how to interpret results?
     - what do large weights mean?
 - PCA of only the methanotrophy genes?
 - add the other data sets into our PCA projections: can we use them at all?
 - is our RPKM data really RPKM?  It's all integers, which makes it seem like counts.
-- finalize labels of methanotrophs/methylotrophs
-- play with sklearn cross validation
-- finalize research interests
-  - which methylotrophs are present, and what methanotrophy genes cause it?
-    - PCA on pooled methanotrophy gene expression
-    - use those PCA components to predict composition of methylotrophs
-- start sketching out poster
-  - google docs?
 - what fraction of reads are unmapped?
   - is Janet's old orange & gray plot from bins or these genomes?
 -
-
-=== Done ===
-
 
 === Still pondering ===
 - compositional effects (e.g. fractional abundance)
