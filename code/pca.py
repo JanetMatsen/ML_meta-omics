@@ -137,20 +137,20 @@ def plot_color_by_week(plot_data, variances, plot_pca_kwargs):
     color_palette = build_double_color_palette(num_items=14 - 4 + 1,
                                                weeks_before_switch=7)
 
-    plot_pca_results(plot_data, variances,
-                     color_palette=color_palette,
-                     color_variable='week',
-                     **plot_pca_kwargs)
+    return plot_pca_results(plot_data, variances,
+                            color_palette=color_palette,
+                            color_variable='week',
+                            **plot_pca_kwargs)
+
 
 def plot_color_by_category(plot_data, variances,
                            categories, n_categories,
                            plot_pca_kwargs):
-
-    color_palette = build_categorical_color_palette(n_categories,)
-    plot_pca_results(plot_data, variances,
-                     color_palette=color_palette,
-                     color_variable=categories,
-                     **plot_pca_kwargs)
+    color_palette = build_categorical_color_palette(n_categories, )
+    return plot_pca_results(plot_data, variances,
+                            color_palette=color_palette,
+                            color_variable=categories,
+                            **plot_pca_kwargs)
 
 
 def build_categorical_color_palette(n):
