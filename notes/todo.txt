@@ -24,6 +24,7 @@
 - don't let R normalize, or at least
 - WHAT ARE THE GENES?
 - What are the weights?  Are many of them close to zero?
+- hack the R source to give us access to the x, z transformations. 
 - CCA:
   - how to interpret results?
     - what do large weights mean?
