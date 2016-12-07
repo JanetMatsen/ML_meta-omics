@@ -76,7 +76,7 @@ model_stats <- function(CCA_obj){
                           v_len=v_len, v_zeros=v_zeros, v_coeffs=v_coeffs, v_frac_zeros=v_frac_zeros))
 }
 
-print model_stats(model)
+print(model_stats(model))
 
 
 u <- model$u
