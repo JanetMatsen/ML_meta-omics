@@ -73,9 +73,9 @@ class CrossValCCA(object):
         for tup, df in self.results.groupby('fold'):
             fold = int(tup)
             print(fold)
-            colors = ['#b3cde3', '#8c96c6', '#8856a7', '#810f7c'] # http://colorbrewer2.org/#type=sequential&scheme=BuPu&n=5
+            colors = ['#8c96c6', '#8c6bb1', '#88419d', '#6e016b']
             df = df.sort(x)
-            plt.plot(df[x], df[y], color=colors[fold],
+            plt.plot(df[x], df[y], color=colors[fold-1],
                      linestyle='--', marker='o', label="fold {}".format(fold))
         plt.legend(loc = 'best')
         plt.xlabel(x)
