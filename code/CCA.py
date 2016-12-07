@@ -106,6 +106,8 @@ class ExpressionCCA(CcaAnalysis):
         self.x_val_filepath = x_val_filepath
         self.z_val_filepath = z_val_filepath
         self.gene_filepath = gene_filepath
+        self.genes = pd.read_csv(gene_filepath, sep='\t', header=None)
+        self.genes.columns = ['gene'] # rename df column
 
         self.penalty_x = penalty_x
         self.penalty_z = penalty_z
