@@ -5,6 +5,8 @@
   https://www.youtube.com/watch?v=59_zANrbDpQ
 
 === TODO ===
+- try R's permute on whole data set w/ new data
+  - does the preprocessed data need to be retrieved from the notebook? 
 - why do the PCA projections seem to show < 80 points? (are they all clumped)?
 - what genes are chosen for the 8 nonzero weights given the whole data set?
   - how does this compare to the genes from X-val?
