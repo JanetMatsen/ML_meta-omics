@@ -53,6 +53,7 @@ print('train model')
 model <- CCA(x, z,
              #standardize=FALSE, # don't standardize or we can't transform
              typex="standard", typez="standard", K=1,
+             niter=1000,
              penaltyx=penaltyx, penaltyz=penaltyz)
 
 u <- model$u

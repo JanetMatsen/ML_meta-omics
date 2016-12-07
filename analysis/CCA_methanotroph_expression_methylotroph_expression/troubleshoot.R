@@ -68,18 +68,24 @@ model_stats <- function(CCA_obj){
 
 #======  Loop over some different penalty values and find the number of zeros =========
 
+num_iter = 1000
+
 test_pair_of_penalties <- function(penalty_list, x_penalty, z_penalty){
         print(paste("x penalty: " + x_penalty + "z penalty" + z))
         model = CCA(x, z, typex="standard", typez="standard", K=1,
+                    niter=num_iter,
                     penaltyx=x_penalty, penaltyz=z_penalty_list)
         return(model)}
 
-analyze_penalty_grid <- function(penalty_list){
+analyze_penalty_grid <- function(penalty_list, num_iter){
         results_coarse = data.frame()
         print(results_coarse)
         for (x_penalty in penalty_list){
                 for (z_penalty in penalty_list){
-                        model <- CCA(x, z, typex="standard", typez="standard", K=1,
+                        print(sprintf("--- x penalty: %f ---- z_penalty: %f ----",
+                                x_penalty, z_penalty))
+                        model <- CCA(x, z, typex="standard", typez="standard", K=2,
+                                     niter=num_iter,
                                      penaltyx=x_penalty, penaltyz=z_penalty)
                         results_coarse <- rbind(results_coarse, model_stats(model))
                 }
@@ -87,7 +93,7 @@ analyze_penalty_grid <- function(penalty_list){
         return(results_coarse)
 }
 
-demo_results = analyze_penalty_grid(c(0.1, 0.2))
+demo_results = analyze_penalty_grid(c(0.1, 0.2), num_iter)
 demo_results
 p <- ggplot(demo_results, aes(x_penalty, z_penalty)) +
         geom_tile(aes(fill = u_coeffs)) +
@@ -107,7 +113,7 @@ p <- ggplot(demo_results_melted, aes(x_penalty, z_penalty)) +
 p
 
 # -------- Test a real grid ------
-grid = analyze_penalty_grid(c(0.001, seq(0.01, 0.1, by=0.01)))
+grid = analyze_penalty_grid(c(0.001, seq(0.01, 0.1, by=0.01)), num_iter)
 grid_melted = melt(grid, id.vars = c("x_penalty", "z_penalty"),
                    measure.vars = c("u_coeffs", "v_coeffs"))
 grid_melted
@@ -118,7 +124,9 @@ ggplot(grid_melted, aes(x_penalty, z_penalty)) +
         ggtitle("# of coefficients for each vector") +
         facet_wrap(~variable) + theme_bw()
 dir.create('./plots/')
-ggsave('./plots/161206_num_weights_is_independent_of_oter_penalty.pdf')
+filename = sprintf('./plots/161206_num_weights_is_independent_of_other_penalty_%d_iter..pdf',
+                   num_iter)
+ggsave(filename)
 
 # -------- Run same penalties for x and z wit higher resolution ------
 
@@ -127,6 +135,7 @@ analyze_penalty_list <- function(penalty_list){
         results_coarse = data.frame()
         for (penalty in penalty_list){
                 model <- CCA(x, z, typex="standard", typez="standard", K=1,
+                             niter=num_iter,
                              penaltyx=penalty, penaltyz=penalty)
                 results_coarse <- rbind(results_coarse, model_stats(model))
         }
@@ -148,7 +157,9 @@ tail(results_melted)
 ggplot(results_melted, aes(penalty, num_nonzero_weights,
                            color=regularization_penalty)) + geom_point() + geom_line() +
         geom_hline(yintercept=8)
-ggsave('./plots/161206_num_nonzero_weights_vs_penalty_for_full_training_set.pdf')
+filename = sprintf('./plots/161206_num_nonzero_weights_vs_penalty_for_full_training_set_%d_iter.pdf',
+                   num_iter)
+ggsave(filename)
 
 # with N = 83, we need < ~8 weights
 penalty_list[0:10]
@@ -156,12 +167,14 @@ penalty_list[0:10]
 penalty_x = 0.0335  # 0.33 --> 7, 0.34 --> 9
 penalty_z = 0.022
 final_model = CCA(x, z, typex="standard", typez="standard", K=1,
+                  niter=num_iter,
+                  #standardize = FALSE,
                   penaltyx=penalty_x, penaltyz=penalty_z)
 final_results = model_stats(final_model)
 final_results
 
 # Save these resutls
-write.table(final_model$u, file = './results/u_whole_training_set--8_features.csv', row.names = FALSE)
-write.table(final_model$v, file = './results/v_whole_training_set--8_features.csv', row.names = FALSE)
+#write.table(final_model$u, file = './results/u_whole_training_set--8_features.csv', row.names = FALSE)
+#write.table(final_model$v, file = './results/v_whole_training_set--8_features.csv', row.names = FALSE)
 
 print(final_model)
