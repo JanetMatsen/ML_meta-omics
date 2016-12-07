@@ -12,11 +12,11 @@
 library("PMA")
 library("ggplot2")
 
-m <- read.csv('../../data/cross_val_data/methanotroph_fold1_train.tsv',
+m <- read.csv('../../data/cross_val_data/methanotroph_fold4_ss_train.tsv',
               sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 dim(m)
 
-nmm <- read.csv('../../data/cross_val_data/methylotroph_fold1_train.tsv',
+nmm <- read.csv('../../data/cross_val_data/methylotroph_fold4_ss_train.tsv',
                 sep = '\t', header = FALSE, stringsAsFactors = FALSE) #, colClasses=c("product"="character"))
 dim(nmm)
 
@@ -164,8 +164,17 @@ ggsave(filename)
 # with N = 83, we need < ~8 weights
 penalty_list[0:10]
 
+colSums(x)
+rowSums(x)
+
 penalty_x = 0.0335  # 0.33 --> 7, 0.34 --> 9
 penalty_z = 0.022
+x2 = x[,apply(x, 2, var, na.rm=TRUE) != 0]
+z2 = z[,apply(z, 2, var, na.rm=TRUE) != 0]
+dim(x)
+dim(x2)
+
+#final_model = CCA(x2, z2, typex="standard", typez="standard", K=1,
 final_model = CCA(x, z, typex="standard", typez="standard", K=1,
                   niter=num_iter,
                   #standardize = FALSE,
