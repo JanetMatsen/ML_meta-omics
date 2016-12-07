@@ -83,8 +83,8 @@ class ExpressionCCA(CcaAnalysis):
     """
     Wrapper class: prepare and run CCA for particular x, z data sets
     """
-    def __init__(self, x_train_filename, z_train_filename,
-                 x_val_filename, z_val_filename,
+    def __init__(self, x_train_filepath, z_train_filepath,
+                 x_val_filepath, z_val_filepath,
                  gene_filepath,
                  input_filepath, u_v_output_dir,
                  penalty_x, penalty_z,
@@ -101,10 +101,10 @@ class ExpressionCCA(CcaAnalysis):
             os.mkdir(u_v_output_dir)
         self.u_v_output_dir = u_v_output_dir
 
-        self.x_train_filepath = x_train_filename
-        self.z_train_filepath = z_train_filename
-        self.x_val_filepath = x_val_filename
-        self.z_val_filepath = z_val_filename
+        self.x_train_filepath = x_train_filepath
+        self.z_train_filepath = z_train_filepath
+        self.x_val_filepath = x_val_filepath
+        self.z_val_filepath = z_val_filepath
         self.gene_filepath = gene_filepath
 
         self.penalty_x = penalty_x
