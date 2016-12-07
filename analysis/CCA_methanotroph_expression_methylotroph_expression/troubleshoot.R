@@ -12,13 +12,19 @@
 library("PMA")
 library("ggplot2")
 
-m <- read.csv('../../data/cross_val_data/methanotroph_fold4_ss_train.tsv',
+m <- read.csv('../../data/cross_val_data/methanotroph_fold4_ss_filtered_train.tsv',
               sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 dim(m)
+m_genes <- read.csv('../../data/cross_val_data/methanotroph_fold4_ss_filtered_genes.tsv',
+                    sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+dim(m_genes)
 
-nmm <- read.csv('../../data/cross_val_data/methylotroph_fold4_ss_train.tsv',
+nmm <- read.csv('../../data/cross_val_data/methylotroph_fold4_ss_filtered_train.tsv',
                 sep = '\t', header = FALSE, stringsAsFactors = FALSE) #, colClasses=c("product"="character"))
 dim(nmm)
+nmm_genes <- read.csv('../../data/cross_val_data/methylotroph_fold4_ss_filtered_genes.tsv',
+                sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+dim(nmm_genes)
 
 dim(m) # [1]   61 4840
 dim(nmm) # [1]    61 10123
