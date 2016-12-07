@@ -76,7 +76,7 @@ class CcaAnalysis(object):
     @staticmethod
     def num_nonzero(vector):
         # for counting # of nonzero components in u and v
-        return sum(vector == 0)
+        return sum(vector != 0)
 
 
 class ExpressionCCA(CcaAnalysis):
@@ -170,6 +170,8 @@ class ExpressionCCA(CcaAnalysis):
         stderr_file.close()
 
         # R adds a header row, 'V1' we chop off.
+        print('read u in from {}'.format(u_path))
+        print('read v in from {}'.format(v_path))
         u = np.genfromtxt(u_path, delimiter='\t', skip_header=1)
         v = np.genfromtxt(v_path, delimiter='\t', skip_header=1)
         if verbose:
