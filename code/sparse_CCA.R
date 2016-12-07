@@ -56,6 +56,29 @@ model <- CCA(x, z,
              niter=1000,
              penaltyx=penaltyx, penaltyz=penaltyz)
 
+model_stats <- function(CCA_obj){
+        x_penalty = CCA_obj$penaltyx
+        u = CCA_obj$u[,1]
+        u_len = length(u)
+        u_zeros = sum(u == 0)
+        u_coeffs = sum(u != 0)
+        u_frac_zeros = u_zeros/u_len
+
+        z_penalty = CCA_obj$penaltyz
+        v = CCA_obj$v[,1]
+        v_len = length(v)
+        v_zeros = sum(v == 0)
+        v_coeffs = sum(v != 0)
+        v_frac_zeros = v_zeros/v_len
+        return(data.frame(x_penalty=x_penalty,
+                          u_len=u_len, u_zeros=u_zeros, u_coeffs=u_coeffs, u_frac_zeros=u_frac_zeros,
+                          z_penalty=z_penalty,
+                          v_len=v_len, v_zeros=v_zeros, v_coeffs=v_coeffs, v_frac_zeros=v_frac_zeros))
+}
+
+print model_stats(model)
+
+
 u <- model$u
 v <- model$v
 
