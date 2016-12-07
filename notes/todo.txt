@@ -5,9 +5,19 @@
   https://www.youtube.com/watch?v=59_zANrbDpQ
 
 === TODO ===
-- remove protein of unknown function
-  - "conserved", 'hypothetical'
-- try the cross-val more.
+- (J) ask about SS in Py & R
+- re-do PCA since we dropped hypothetick & unknown
+  - save w/ a different filename so we can compare
+- add the T/F array --> gives you the names of genes kept
+  - actually drop the == 0 ones (keep the != 0 cols)
+  - add the names to the CCA .py objet thing
+  - run test_single_Xval_set.R
+  - if troubleshoot.R works, that's wonderful.
+- if standardize=False workes in troubleshoot.R or test_single_Xval_set.R
+  (unexpected), update CCA.R, which gets called by Python
+- compare the normalized matrix from StandardScalar to that of R
+  - plot value in one against value from other
+- Re-run cross-val
 - is there a way to get out of standard scalar in R?
 - plot time series
 - increase the iteration threshold more
