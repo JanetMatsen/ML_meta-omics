@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import re
 
+import matplotlib.pyplot as plt
+
 from CCA import ExpressionCCA
 
 class CrossValCCA(object):
@@ -15,6 +17,7 @@ class CrossValCCA(object):
         self.path_to_R_script=path_to_R_script
 
         self.results = pd.DataFrame()
+        self.models = dict()
         self.models_made = 0
 
     def model(self, x_train_filepath, z_train_filepath, pen_x, pen_z,
@@ -35,6 +38,10 @@ class CrossValCCA(object):
                             u_v_output_dir = self.uv_dir,
                             verbose = verbose,
                             path_to_R_script=self.path_to_R_script)
+        # Store the model in the object's model dict
+        self.models[self.models_made] = cca
+
+        # build up the objects results df
         cca.summarise()
         model_summary = cca.summary
         model_summary['model number'] = self.models_made
@@ -54,6 +61,31 @@ class CrossValCCA(object):
     def fold_name(string):
         m = re.search('[_A-z]+fold([0-9]+)[._A-z]+', string)
         return int(m.group(1))
+
+    def plot_sparsity_projections(self, set='x', figsize=(4, 4), filename=None):
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+        if set == 'x':
+            x = 'penalty_x'
+            y = '# nonzero u weights'
+        if set == 'z':
+            x = 'penalty_z'
+            y = '# nonzero v weights'
+        for tup, df in self.results.groupby('fold'):
+            fold = int(tup)
+            print(fold)
+            colors = ['#b3cde3', '#8c96c6', '#8856a7', '#810f7c'] # http://colorbrewer2.org/#type=sequential&scheme=BuPu&n=5
+            df = df.sort(x)
+            plt.plot(df[x], df[y], color=colors[fold],
+                     linestyle='--', marker='o', label="fold {}".format(fold))
+        plt.legend(loc = 'best')
+        plt.xlabel(x)
+        plt.ylabel('# nonzero weights')
+
+        if filename is not None:
+            fig.savefig(filename + '.pdf')
+
+        return fig
+
 
 
 
