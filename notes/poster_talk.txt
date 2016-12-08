@@ -1,0 +1,28 @@
+Main points:
+
+- We're biologists! Often have to deal with small N, large d datasets.
+- Our research question evolved quite a bit:
+	- what is the "y" we want to predict?
+	- came to realize interesting biological questions were multivariate
+		- what species tend to show up together?
+		- how do environmental perturbations affect overall
+		  population composition? Can we detect trends of behavior?
+		- what genes and/or protein functions are important for
+		  determining which species cohabitate?
+- Model selection:
+	- at first, trying to fit our data into the "predict single output" framework
+	- got excited hearing about CCA, since it gave us a way to look at
+	  complex relationships in high-dimensional data
+	- however, CCA is unstable when N << d, and we had LOTS of features
+	- chose to use a sparse CCA implementation (so that we have sufficient power
+	  to get decent estimates)
+	- filtered data to reduce redundant/noninformative features
+		- aggregate on gene name
+		- filter out hypothetical/unknown genes
+	- cross-validation and hyperparameter tuning (to avoid overfitting)
+
+- Next steps: 
+	- how different are the predictive genes across folds?
+	- run on all of data with final hyperparameters, and see which genes drive
+	  metabolic fn (as evidenced by gene expression) in the other species group
+	- observe which types of genes are impt for predicting species composition
