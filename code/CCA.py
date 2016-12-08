@@ -10,7 +10,7 @@ class CcaAnalysis(object):
     """
     Analyze the results of sparse CCA results (run in R)
     """
-    def __init__(self, x, z, u, v, val_x, val_z):
+    def __init__(self, x, z, u, v, val_x=None, val_z=None):
         self.x = x
         self.z = z
         self.u = u
@@ -23,17 +23,21 @@ class CcaAnalysis(object):
 
     def project(self):
         self.x_projected = self.x.dot(self.u)
-        self.x_val_projected = self.val_x.dot(self.u)
         self.z_projected = self.z.dot(self.v)
-        self.z_val_projected = self.val_z.dot(self.v)
+        if (self.val_x is not None) and (self.val_x is not None):
+            self.x_val_projected = self.val_x.dot(self.u)
+            self.z_val_projected = self.val_z.dot(self.v)
 
     def plot_projections(self, filename=None):
         # scatter plot of x.dot(u) vs z.dot(v)
         # one color for train, one color for validation
         fig, ax = plt.subplots(1, 1, figsize=(3,3))
         colors = ['#bdbdbd','#31a354']
-        plot_vars = [(self.x_projected, self.z_projected),
-                    (self.x_val_projected, self.z_val_projected)]
+        if (self.val_x is not None) and (self.val_z is not None):
+            plot_vars = [(self.x_projected, self.z_projected),
+                        (self.x_val_projected, self.z_val_projected)]
+        else:
+            plot_vars = [(self.x_projected, self.z_projected)]
 
         series = 0
         for (x, y) in plot_vars:
@@ -44,7 +48,6 @@ class CcaAnalysis(object):
         if filename is not None:
             fig.savefig(filename + '.pdf')
 
-#        print('testing')
         return fig
 
     @staticmethod
@@ -58,8 +61,9 @@ class CcaAnalysis(object):
         summary = {}
         summary['train correlation'] = \
             self.correlation(self.x_projected, self.z_projected)
-        summary['validation correlation'] = \
-            self.correlation(self.x_val_projected, self.z_val_projected)
+        if (self.val_x is not None) and (self.val_z is None):
+            summary['validation correlation'] = \
+                self.correlation(self.x_val_projected, self.z_val_projected)
         summary['# nonzero u weights'] = self.num_nonzero(self.u)
         summary['# nonzero v weights'] = self.num_nonzero(self.v)
 
@@ -84,10 +88,11 @@ class ExpressionCCA(CcaAnalysis):
     Wrapper class: prepare and run CCA for particular x, z data sets
     """
     def __init__(self, x_train_filepath, z_train_filepath,
-                 x_val_filepath, z_val_filepath,
-                 gene_filepath,
+                 x_gene_filepath, z_gene_filepath,
                  input_filepath, u_v_output_dir,
                  penalty_x, penalty_z,
+                 # validation data is optional; final model won't have it.
+                 x_val_filepath=None, z_val_filepath=None,
                  verbose = False,
                  path_to_R_script='../../code/sparse_CCA.R'):
 
@@ -105,9 +110,13 @@ class ExpressionCCA(CcaAnalysis):
         self.z_train_filepath = z_train_filepath
         self.x_val_filepath = x_val_filepath
         self.z_val_filepath = z_val_filepath
-        self.gene_filepath = gene_filepath
-        self.genes = pd.read_csv(gene_filepath, sep='\t', header=None)
-        self.genes.columns = ['gene'] # rename df column
+        self.x_gene_filepath = x_gene_filepath
+        self.z_gene_filepath = z_gene_filepath
+
+        self.x_genes = pd.read_csv(x_gene_filepath, sep='\t', header=None)
+        self.z_genes = pd.read_csv(z_gene_filepath, sep='\t', header=None)
+        self.x_genes.columns = ['gene'] # rename df column
+        self.z_genes.columns = ['gene'] # rename df column
 
         self.penalty_x = penalty_x
         self.penalty_z = penalty_z
@@ -115,10 +124,16 @@ class ExpressionCCA(CcaAnalysis):
         # prepare u and v
         x, z, u, v = self.write_csv_and_run_R(verbose=verbose)
 
+        if (self.x_val_filepath is not None) and (self.z_val_filepath is not None):
+            val_x=self.load_array(self.x_val_filepath)
+            val_z=self.load_array(self.x_val_filepath)
+        else:
+            val_x, val_z = None, None
+
+
         super(ExpressionCCA, self).__init__(
             x=x, z=z, u=u, v=v,
-            val_x=self.load_array(self.x_val_filepath),
-            val_z=self.load_array(self.z_val_filepath))
+            val_x=val_x, val_z=val_z)
 
     @staticmethod
     def load_array(filepath, verbose=False):
@@ -132,19 +147,28 @@ class ExpressionCCA(CcaAnalysis):
         self.x = x
         z = self.load_array(self.z_train_filepath)
         self.z = z
-        names = self.load_array(self.gene_filepath)
+        names = self.load_array(self.x_gene_filepath)
         self.gene_names = names
 
         # get the data back out
         def prepare_output_filename(input_filename, extra_string):
             # methylotroph_fold1_train.tsv --> fold1_train_u.tsv
-            if verbose:
-                print('output dir: {}'.format(self.u_v_output_dir))
             s = os.path.basename(input_filename)
+            if verbose:
+                print('input filename: {}'.format(input_filename))
+                print('extra string: {}'.format(extra_string))
+                print('output dir: {}'.format(self.u_v_output_dir))
+                print('s: {}'.format(s))
             m = re.search('[_A-z]+(fold[0-9]+[._A-z]+.tsv)', s)
-            s = m.group(1)
-            s = s.replace('.tsv', '_{}.tsv'.format(extra_string))
-            s = os.path.join(self.u_v_output_dir, s)
+            if m is not None: # (match found)
+                s = m.group(1)
+                s = s.replace('.tsv', '_{}.tsv'.format(extra_string))
+                s = os.path.join(self.u_v_output_dir, s)
+            else:
+                print('no group name found; must not be X-val data')
+                s = s.replace('.tsv', '_{}.tsv'.format(extra_string))
+                s = os.path.join(self.u_v_output_dir, s)
+
             if verbose:
                 print('Will save output for {} to {}'.format(input_filename, s))
             return s
