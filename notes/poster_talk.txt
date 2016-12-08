@@ -1,6 +1,11 @@
 Main points:
 
-- We're biologists! Often have to deal with small N, large d datasets.
+- both of our labs deal with a lot of RNA sequencing data
+	- one characteristic of thees set is small N, large d datasets.
+- we are dealing with gene expression data from sediment enrichments:
+	- may different organisms per sample
+- there were many potential questions we could ask w/ this set:
+ 	-
 - Our research question evolved quite a bit:
 	- what is the "y" we want to predict?
 	- came to realize interesting biological questions were multivariate
@@ -21,8 +26,16 @@ Main points:
 		- filter out hypothetical/unknown genes
 	- cross-validation and hyperparameter tuning (to avoid overfitting)
 
-- Next steps: 
+- Next steps:
 	- how different are the predictive genes across folds?
 	- run on all of data with final hyperparameters, and see which genes drive
 	  metabolic fn (as evidenced by gene expression) in the other species group
 	- observe which types of genes are impt for predicting species composition
+
+=== Notes from discussion ===
+- look @ features that pop up with high regularization.
+	- how big are the counts?
+	- If they are rare, drop them.
+- pseudo counts before SS.
+	- like throwing in an L2 norm. Multiple of identity.
+- connect to NLP literature if easy
