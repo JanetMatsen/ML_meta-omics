@@ -62,27 +62,70 @@ class CrossValCCA(object):
         m = re.search('[_A-z]+fold([0-9]+)[._A-z]+', string)
         return int(m.group(1))
 
-    def plot_sparsity_projections(self, set='x', figsize=(4, 4), filename=None):
+    def plot_series_by_fold(self, x_col, y_col, title,
+                            colors=None, figsize=(4, 4), filename=None):
         fig, ax = plt.subplots(1, 1, figsize=figsize)
+
+        if colors is 'greens':
+            colors = ['#74c476', '#41ab5d', '#238b45', '#005a32'] # http://colorbrewer2.org/#type=sequential&scheme=BuPu&n=5
+        elif colors is 'purples':
+            colors = ['#8c96c6', '#8c6bb1', '#88419d', '#6e016b']
+
+        for tup, df in self.results.groupby('fold'):
+            fold = int(tup)
+            df = df.sort(x_col)
+            plt.plot(df[x_col], df[y_col], color=colors[fold-1],
+                     linestyle='--', marker='o', label="fold {}".format(fold))
+        plt.legend(loc = 'best')
+        plt.xlabel(x_col)
+        plt.ylabel(y_col)
+        if title is not None:
+            plt.title(title)
+
+        plt.tight_layout()
+
+        if filename is not None:
+            fig.savefig(filename)
+
+        return fig
+
+    def plot_correlation_vs_penalty(self, set, penalty='x',
+                                    figsize=(4, 4), title=None, filename=None):
+
+        if penalty == 'x':
+            x = 'penalty_x'
+        elif penalty == 'z':
+            x = 'penalty_z'
+        else:
+            raise NameError, "did you mean 'x' or 'z'?"
+
+        if set == 'train':
+            y = 'train correlation'
+            title = "cross-validation fit: training data"
+        elif set == 'val' or set =='validation':
+            y = 'validation correlation'
+            title = "cross-validation fit: validation data"
+        else:
+            raise NameError, "did you mean 'train' or 'val'?"
+
+        fig = self.plot_series_by_fold(x_col=x, y_col=y, title=title,
+                                        colors='purples', figsize=figsize,
+                                        filename=filename)
+        return fig
+
+    def plot_num_nonzero_coeffs_vs_penalty(self, set, title=None,
+                                           figsize=(4, 4), filename=None):
+
         if set == 'x':
             x = 'penalty_x'
             y = '# nonzero u weights'
         if set == 'z':
             x = 'penalty_z'
             y = '# nonzero v weights'
-        for tup, df in self.results.groupby('fold'):
-            fold = int(tup)
-            print(fold)
-            colors = ['#8c96c6', '#8c6bb1', '#88419d', '#6e016b']
-            df = df.sort(x)
-            plt.plot(df[x], df[y], color=colors[fold-1],
-                     linestyle='--', marker='o', label="fold {}".format(fold))
-        plt.legend(loc = 'best')
-        plt.xlabel(x)
-        plt.ylabel('# nonzero weights')
 
-        if filename is not None:
-            fig.savefig(filename + '.pdf')
+        fig = self.plot_series_by_fold(x_col=x, y_col=y, title=title,
+                                        colors='purples', figsize=figsize,
+                                        filename=filename)
 
         return fig
 
