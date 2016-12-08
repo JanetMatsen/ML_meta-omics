@@ -208,6 +208,31 @@ class ExpressionCCA(CcaAnalysis):
 
         return x, z, u, v
 
+    def associate_weights_with_gene_names(self):
+        x_gene_df = self.x_genes
+        u_weight_df = pd.DataFrame({'weight':self.u,
+                                  'abs(weight)':np.abs(self.u)})
+        u_info = pd.concat([x_gene_df, u_weight_df], axis=1)
+        self.u_with_names = u_info
+
+        # not DRY
+        z_gene_df = self.z_genes
+        v_weight_df = pd.DataFrame({'weight':self.v,
+                                  'abs(weight)':np.abs(self.v)})
+        v_info = pd.concat([z_gene_df, v_weight_df], axis=1)
+        self.v_with_names = v_info
+
+    def sorted_weights(self, vector='u'):
+        if self.u_with_names is None or self.v_with_names is None:
+            self.associate_weights_with_gene_names()
+
+        if vector=='u':
+            return(self.u_with_names.sort_values(by='abs(weight)', ascending=False))
+        elif vector=='v':
+            return(self.v_with_names.sort_values(by='abs(weight)', ascending=False))
+        else:
+            print('expected vector argument to be "u" or "v"')
+
 
 class SklearnCca(CcaAnalysis):
     def __init__(self, penalty_x, penalty_z,
