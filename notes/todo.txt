@@ -5,27 +5,19 @@
   https://www.youtube.com/watch?v=59_zANrbDpQ
 
 === TODO ===
+- why do the PCA projections seem to show < 80 points? (are they all clumped)?
+- what genes are chosen for the 8 nonzero weights given the whole data set?
+  - how does this compare to the genes from X-val?
 - poster:
   - Show plot of correlation vs sparsity in u, v
   - Show scatter plots of projections (half baked in CCA.py: need axes labels etc)
+  - gene names for nonzero weights
 - plot correlation as f(sparsity in u, v)
-- re-do PCA since we dropped hypothetick & unknown
-  - save w/ a different filename so we can compare
-- add the T/F array --> gives you the names of genes kept
-  - actually drop the == 0 ones (keep the != 0 cols)
-  - add the names to the CCA .py objet thing
-  - run test_single_Xval_set.R
-  - if troubleshoot.R works, that's wonderful.
-- if standardize=False workes in troubleshoot.R or test_single_Xval_set.R
-  (unexpected), update CCA.R, which gets called by Python
-- compare the normalized matrix from StandardScalar to that of R
-  - plot value in one against value from other
-- Re-run cross-val
-- is there a way to get out of standard scalar in R?
-- plot time series
-- increase the iteration threshold more
-- don't let R normalize, or at least
-- WHAT ARE THE GENES?
+- hack the R package to show us what the transformation is doing?
+  - compare the normalized matrix from StandardScalar to that of R
+    - plot value in one against value from other
+- plot CCA of final data with time series?
+  - is 8 vars really enough to show a time trend?
 - What are the weights?  Are many of them close to zero?
 - hack the R source to give us access to the x, z transformations.
 - CCA:
