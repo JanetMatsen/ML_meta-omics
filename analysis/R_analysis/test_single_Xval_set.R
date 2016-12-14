@@ -12,11 +12,14 @@
 library("PMA")
 library("ggplot2")
 
-m <- read.csv('../../data/cross_val_data/methanotroph_fold4_ss_train.tsv',
+data_path = './../../data/cross_val_data'
+list.files(path = data_path, pattern = '.*fold4.*.tsv')
+
+m <- read.csv(paste0(data_path, '/methanotroph_fold4_ss_filtered_train.tsv'),
               sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 dim(m)
 
-nmm <- read.csv('../../data/cross_val_data/methylotroph_fold4_ss_train.tsv',
+nmm <- read.csv(paste0(data_path, '/methylotroph_fold4_ss_filtered_train.tsv'),
                 sep = '\t', header = FALSE, stringsAsFactors = FALSE) #, colClasses=c("product"="character"))
 dim(nmm)
 
@@ -76,7 +79,7 @@ dim(x2)
 
 #final_model = CCA(x2, z2, typex="standard", typez="standard", K=1,
 final_model = CCA(x, z, typex="standard", typez="standard", K=1,
-                  niter=num_iter,
+                  niter=1000,
                   #standardize = FALSE,  <-- would be great if this magically worked.
                   penaltyx=penalty_x, penaltyz=penalty_z)
 final_results = model_stats(final_model)
