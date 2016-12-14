@@ -139,7 +139,7 @@ ggplot(grid_melted, aes(x_penalty, z_penalty)) +
         theme_bw() + bold_text
         #theme_bw()
 dir.create('./plots/')
-filename = sprintf('./plots/161207_num_weights_is_independent_of_other_penalty_%d_iter.pdf',
+filename = sprintf('./plots/161214_num_weights_is_independent_of_other_penalty_%d_iter.pdf',
                    num_iter)
 filename = sub("pdf", "png", filename)
 print(filename)
