@@ -1,3 +1,8 @@
+=== Todo ===
+- drop in right PCA
+- J re-run notebook with more cross-validation, drop in figures. 
+- send Serena pickles of X-val and the final one.
+
 === TO Discuss ===
 - is CCA is the right choice for predicting which methylotroph will dominate?
   - do we want an output for Y that is linear combinations of methylotrophs? (yes?)
@@ -5,7 +10,7 @@
   https://www.youtube.com/watch?v=59_zANrbDpQ
 
 === TODO ===
-- why do our Xval results suggest 0.15 and R's suggest
+- why do our Xval results suggest 0.15 and R's suggest 0.5-ish?
   - Could be that the best regularization strength depends on N.
     - Their X-val is 8 fold.  Small held-out sets —> noisy results,
       but the N for each fold is closer to the whole set’s N.
