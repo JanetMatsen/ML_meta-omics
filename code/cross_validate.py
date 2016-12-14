@@ -21,9 +21,9 @@ class CrossValCCA(object):
         self.models_made = 0
 
     def model(self, x_train_filepath, z_train_filepath, pen_x, pen_z,
-              x_val_filepath, z_val_filepath, gene_name_filepath,
-              verbose=False
-              ):
+              x_val_filepath, z_val_filepath,
+              x_gene_filepath, z_gene_filepath,  # gene names
+              verbose=False):
 
         self.models_made += 1
         # todo: remove expected filename if it exsits.
@@ -33,7 +33,8 @@ class CrossValCCA(object):
                             penalty_z = pen_z,
                             x_val_filepath= x_val_filepath,
                             z_val_filepath= z_val_filepath,
-                            gene_filepath = gene_name_filepath,
+                            x_gene_filepath=x_gene_filepath,
+                            z_gene_filepath=z_gene_filepath,
                             input_filepath = self.input_filepath,
                             u_v_output_dir = self.uv_dir,
                             verbose = verbose,

@@ -24,7 +24,7 @@ class CcaAnalysis(object):
     def project(self):
         self.x_projected = self.x.dot(self.u)
         self.z_projected = self.z.dot(self.v)
-        if (self.val_x is not None) and (self.val_x is not None):
+        if (self.val_x is not None) and (self.val_z is not None):
             self.x_val_projected = self.val_x.dot(self.u)
             self.z_val_projected = self.val_z.dot(self.v)
 
@@ -61,7 +61,7 @@ class CcaAnalysis(object):
         summary = {}
         summary['train correlation'] = \
             self.correlation(self.x_projected, self.z_projected)
-        if (self.val_x is not None) and (self.val_z is None):
+        if (self.val_x is not None) and (self.val_z is not None):
             summary['validation correlation'] = \
                 self.correlation(self.x_val_projected, self.z_val_projected)
         summary['# nonzero u weights'] = self.num_nonzero(self.u)
@@ -126,7 +126,7 @@ class ExpressionCCA(CcaAnalysis):
 
         if (self.x_val_filepath is not None) and (self.z_val_filepath is not None):
             val_x=self.load_array(self.x_val_filepath)
-            val_z=self.load_array(self.x_val_filepath)
+            val_z=self.load_array(self.z_val_filepath)
         else:
             val_x, val_z = None, None
 
